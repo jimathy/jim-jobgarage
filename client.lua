@@ -11,7 +11,7 @@ local Targets = {}
 local parking = {}
 --Garage Locations
 CreateThread(function()
-	for k, v in pairs(Config.Locations) do job = v.label
+	for k, v in pairs(Config.Locations) do job = v.job
 		if v.garage then
 			local out = v.garage.out
 			Targets[#Targets] = 
