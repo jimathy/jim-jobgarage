@@ -85,7 +85,7 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			if data.list.colors then
 				SetVehicleColours(veh, data.list.colors[1], data.list.colors[2])
 			end
-			TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(veh))
+			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
 			SetVehicleDirtLevel(veh, 0.0)
