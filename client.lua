@@ -84,6 +84,10 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			SetEntityHeading(veh, data.coords.w)
 			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
 			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
+			if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
+			if data.list.extras then
+				for _, v in pairs(data.list.extras) do SetVehicleExtra(veh, v, 0) end
+			end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
