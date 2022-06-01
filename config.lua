@@ -4,7 +4,8 @@ print("Jim-JobGarage v1.1 - Job Garage Script by Jimathy")
 -- Using these will change how each vehicle spawns
 -- This can be used for making sure the vehicles comes out exactly how you want it to
 
--- grade = 4, -- This is the job grade required to see the vehicle in the menu 
+-- rank = { 2, 4 }, -- This specifes which grades can see it, and only these grades
+-- grade = 4, -- This specifies the lowest grade and above that can see the vehicle
 -- colors = { 136, 137 }, -- This is the colour index id of the vehicle, Primary and Secondary in that order
 -- bulletproof = true, -- This determines if the tyres are bullet proof (don't ask me why, I was asked to add this)
 -- livery = 1, -- This sets the livery id of the vehicle, (most mod menus would number them or have them in number order) 0 = stock
@@ -44,6 +45,9 @@ Config = {
 					["police"] = {
 						livery = 5,
 						extras = { 1, 2 },
+					},
+					["fbi"] = {
+						rank = { 4 },
 					},
 				},
 			},

@@ -12,6 +12,7 @@ local parking = {}
 --Garage Locations
 CreateThread(function()
 	for k, v in pairs(Config.Locations) do job = v.job
+		print(v.job)
 		if v.garage then
 			local out = v.garage.out
 			Targets[#Targets] = 
@@ -41,8 +42,12 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 	else
 		currentVeh = { out = false, current = nil }
 		table.sort(data.list, function(a, b) return a:lower() < b:lower() end)
-		for k,v in pairs(data.list) do
-			if not v.grade or PlayerJob.grade.level >= v.grade then
+		for k, v in pairs(data.list) do
+			local showButton = false
+			if v.grade then if v.grade <= PlayerJob.grade.level then showButton = true end end
+			if v.rank then for _, b in pairs(v.rank) do if b == PlayerJob.grade.level then showButton = true end end end
+			if not v.grade and not v.rank then showButton = true end
+			if showButton == true then
 				local spawnName = k
 				if QBCore.Shared.Vehicles[spawnName] then k = QBCore.Shared.Vehicles[spawnName].name.." "..QBCore.Shared.Vehicles[spawnName].brand
 				else k = string.lower(GetDisplayNameFromVehicleModel(GetHashKey(spawnName))) k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(tostring(spawnName))) end
@@ -60,6 +65,7 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 			end
 		end
 	end
+	showButton = nil
 	if #vehicleMenu <= 2 then TriggerEvent("QBCore:Notify", "No vehicles available") return end
     exports['qb-menu']:openMenu(vehicleMenu)
 end)
