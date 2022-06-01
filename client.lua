@@ -11,13 +11,12 @@ local Targets = {}
 local parking = {}
 --Garage Locations
 CreateThread(function()
-	for k, v in pairs(Config.Locations) do job = v.job
-		print(v.job)
+	for k, v in pairs(Config.Locations) do
 		if v.garage then
 			local out = v.garage.out
 			Targets[#Targets] = 
 			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out[4]+180.0, debugPoly=Config.Debug, minZ=(out.z-1.03)-0.1, maxZ=out.z-1.03+1.3 }, 
-				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = "Job Vehicles", job = job, coords = v.garage.spawn, list = v.garage.list }, },
+				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = "Job Vehicles", job = v.job, coords = v.garage.spawn, list = v.garage.list }, },
 				distance = 2.0 })
 			RequestModel(`prop_parkingpay`) while not HasModelLoaded(`prop_parkingpay`) do Citizen.Wait(1) end
 			parking[#parking+1] = CreateObject(`prop_parkingpay`, out.x, out.y, out.z-1.03,false,false,false)
