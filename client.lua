@@ -44,7 +44,8 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 		for k,v in pairs(data.list) do
 			if not v.grade or PlayerJob.grade.level >= v.grade then
 				local spawnName = k
-				k = string.lower(GetDisplayNameFromVehicleModel(GetHashKey(spawnName)))	k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(tostring(spawnName)))
+				if QBCore.Shared.Vehicles[spawnName] then k = QBCore.Shared.Vehicles[spawnName].name.." "..QBCore.Shared.Vehicles[spawnName].brand
+				else k = string.lower(GetDisplayNameFromVehicleModel(GetHashKey(spawnName))) k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(tostring(spawnName))) end
 				local seticon = "fas fa-car"
 				local class = GetVehicleClassFromName(GetHashKey(spawnName))
 				if class == 8 then seticon = "fas fa-motorcycle" end -- Motorcycle icon
@@ -82,9 +83,7 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
 			SetEntityHeading(veh, data.coords.w)
 			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
-			if data.list.colors then
-				SetVehicleColours(veh, data.list.colors[1], data.list.colors[2])
-			end
+			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
