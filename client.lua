@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end) 
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 
 AddEventHandler('onResourceStart', function(resource) if GetCurrentResourceName() ~= resource then return end
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
@@ -14,8 +14,8 @@ CreateThread(function()
 	for k, v in pairs(Config.Locations) do
 		if v.garage then
 			local out = v.garage.out
-			Targets[#Targets] = 
-			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out[4]+180.0, debugPoly=Config.Debug, minZ=(out.z-1.03)-0.1, maxZ=out.z-1.03+1.3 }, 
+			Targets[#Targets] =
+			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out[4]+180.0, debugPoly=Config.Debug, minZ=(out.z-1.03)-0.1, maxZ=out.z-1.03+1.3 },
 				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = "Job Vehicles", job = v.job, coords = v.garage.spawn, list = v.garage.list }, },
 				distance = 2.0 })
 			RequestModel(`prop_parkingpay`) while not HasModelLoaded(`prop_parkingpay`) do Citizen.Wait(1) end
@@ -30,11 +30,11 @@ local currentVeh = { out = false, current = nil }
 RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 	RequestAnimDict('amb@prop_human_atm@male@enter') while not HasAnimDictLoaded('amb@prop_human_atm@male@enter') do Wait(1) end
 	if HasAnimDictLoaded('amb@prop_human_atm@male@enter') then TaskPlayAnim(PlayerPedId(), 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 1500, 1, 1, true, true, true) end
-	
-	local vehicleMenu = { { icon = "fas fa-car-tunnel", header = PlayerJob.label.." ".."Job Garage", isMenuHeader = true } }	
+
+	local vehicleMenu = { { icon = "fas fa-car-tunnel", header = PlayerJob.label.." ".."Job Garage", isMenuHeader = true } }
 	vehicleMenu[#vehicleMenu + 1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-jobgarage:client:Menu:Close" } }
 	if currentVeh.out and DoesEntityExist(currentVeh.current) then
-		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-clipboard-list", header = "Vehicle out of Garage", 
+		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-clipboard-list", header = "Vehicle out of Garage",
 										txt = "Vehicle: "..GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)).."<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
 										params = { event = "jim-jobgarage:client:Garage:Blip", }, }
 		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-car-burst", header = "Remove Vehicle", params = { event = "jim-jobgarage:client:RemSpawn" } }
@@ -96,9 +96,9 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			if data.list.livery then
 				if GetNumVehicleMods(veh, 48) == 0 and GetVehicleLiveryCount(veh) ~= 0 then
 					SetVehicleLivery(veh, data.list.livery)
-					SetVehicleMod(veh, 48, -1, false) 
+					SetVehicleMod(veh, 48, -1, false)
 				else
-					SetVehicleMod(veh, 48, (data.list.livery - 1), false) 
+					SetVehicleMod(veh, 48, (data.list.livery - 1), false)
 					SetVehicleLivery(veh, -1)
 				end
 			end
@@ -129,7 +129,7 @@ RegisterNetEvent("jim-jobgarage:client:Garage:Blip", function(data)
 	if markerOn then markerOn = not markerOn end
 	markerOn = true
 	local carBlip = GetEntityCoords(currentVeh.current)
-	if not DoesBlipExist(garageBlip) then 
+	if not DoesBlipExist(garageBlip) then
 		garageBlip = AddBlipForCoord(carBlip.x, carBlip.y, carBlip.z)
 		SetBlipColour(garageBlip, 8)
 		SetBlipRoute(garageBlip, true)
