@@ -1,4 +1,4 @@
-print("Jim-JobGarage v1.1 - Job Garage Script by Jimathy")
+print("^2Jim^7-^2JobGarage ^2v^41^7.^41 ^7- ^2Job Garage Script by ^1Jimathy^7")
 
 --[[	LIST OF POSSIBLE VEHICLE MODIFIERS   ]]--
 -- Using these will change how each vehicle spawns
@@ -14,7 +14,7 @@ print("Jim-JobGarage v1.1 - Job Garage Script by Jimathy")
 -- ANY VEHICLE, BOATS, POLICE CARS, EMS VEHICLES OR EVEN PLANES CAN BE ADDED.
 
 Config = {
-	Debug = false,  -- Enable to use debug features
+	Debug = true,  -- Enable to use debug features
 	CarDespawn = true, -- Sends the vehicle to hell
 	Locations = {
 		{
