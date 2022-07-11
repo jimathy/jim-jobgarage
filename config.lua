@@ -14,7 +14,7 @@ print("^2Jim^7-^2JobGarage ^2v^41^7.^41 ^7- ^2Job Garage Script by ^1Jimathy^7")
 -- ANY VEHICLE, BOATS, POLICE CARS, EMS VEHICLES OR EVEN PLANES CAN BE ADDED.
 
 Config = {
-	Debug = true,  -- Enable to use debug features
+	Debug = false,  -- Enable to use debug features
 	CarDespawn = true, -- Sends the vehicle to hell
 	Locations = {
 		{
