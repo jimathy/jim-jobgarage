@@ -18,39 +18,39 @@ Config = {
 	CarDespawn = true, -- Sends the vehicle to hell
 	Locations = {
 		{
-			zoneEnable = true,
-			job = "mechanic",
-			garage = {
-				spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
-				out = vector4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
-				list = {
-					["cheburek"] = {
-						colors = { 136, 137 },
-						grade = 4,
-						livery = 5,
-						bulletproof = true,
-						extras = { 1, 4 },
-					},
-					["burrito3"] = { },
+		zoneEnable = true,
+		job = "mechanic",
+		garage = {
+			spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
+			out = vector4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
+			list = {
+				["cheburek"] = {
+					colors = { 136, 137 },
+					grade = 4,
+					livery = 5,
+					bulletproof = true,
+					extras = { 1, 4 },
+				},
+				["burrito3"] = { },
+			},
+		},
+		},
+		{
+		zoneEnable = true,
+		job = "police",
+		garage = {
+			spawn = vector4(435.41, -975.93, 25.31, 90.86),
+			out = vector4(441.39, -974.78, 25.7, 178.49),
+			list = {
+				["police"] = {
+					livery = 5,
+					extras = { 1, 2 },
+				},
+				["fbi"] = {
+					rank = { 4 },
 				},
 			},
 		},
-		{
-			zoneEnable = true,
-			job = "police",
-			garage = {
-				spawn = vector4(435.41, -975.93, 25.31, 90.86),
-				out = vector4(441.39, -974.78, 25.7, 178.49),
-				list = {
-					["police"] = {
-						livery = 5,
-						extras = { 1, 2 },
-					},
-					["fbi"] = {
-						rank = { 4 },
-					},
-				},
-			},
 		},
 	},
 }
