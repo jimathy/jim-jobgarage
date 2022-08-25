@@ -9,6 +9,8 @@ Job garage for grabbing job related vehicles
 ![](https://i.imgur.com/JhGaGMS.jpeg)
 ![](https://i.imgur.com/ycXPTj1.jpeg)
 
+### If you need support I have a discord server available, it helps me keep track of issues and give better support.
+https://discord.gg/xKgQZ6wZvS
 
 ### If you think I did a good job here, consider donating as it keeps by lights on and my cat fat/floofy:
 https://ko-fi.com/jixelpatterns
@@ -46,20 +48,20 @@ ensure [jim]
 - Example:
 ```lua
 Locations = {
-		{
-		zoneEnable = true, -- disable if you want to hide this temporarily
-		job = "mechanic", -- set this to required job grade
-		garage = {
-			spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the vehicle will spawn
-			out = vector4(-177.1, -1282.25, 31.3, 179.01),  -- Where you select the vehicles from
-			list = {  -- The list of cars that will spawn
-				["cheburek"] = {
-					colors = { 136, 137 }, -- Color index numbers { primary, secondary },
-					grade = 4, -- Job Grade Required to access this vehicle
-				},
-				["burrito3"] = { },  -- Don't need to add any modifiers/restrictions
+	{
+	zoneEnable = true, -- disable if you want to hide this temporarily
+	job = "mechanic", -- set this to required job grade
+	garage = {
+		spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the vehicle will spawn
+		out = vector4(-177.1, -1282.25, 31.3, 179.01),  -- Where you select the vehicles from
+		list = {  -- The list of cars that will spawn
+			["cheburek"] = {
+				colors = { 136, 137 }, -- Color index numbers { primary, secondary },
+				grade = 4, -- Job Grade Required to access this vehicle
 			},
-		},
+			["burrito3"] = { },  -- Don't need to add any modifiers/restrictions
 		},
 	},
+	},
+},
 ```

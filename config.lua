@@ -15,6 +15,7 @@ print("^2Jim^7-^2JobGarage ^2v^41^7.^41 ^7- ^2Job Garage Script by ^1Jimathy^7")
 
 Config = {
 	Debug = false,  -- Enable to use debug features
+	Notify = "qb",
 	CarDespawn = true, -- Sends the vehicle to hell
 	Locations = {
 		{
