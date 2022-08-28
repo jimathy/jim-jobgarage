@@ -15,9 +15,10 @@ CreateThread(function()
 	for k, v in pairs(Config.Locations) do
 		if v.garage then
 			local out = v.garage.out
-			Parking[#Parking+1] = makeProp({prop = `prop_parkingpay`, coords = vector4(out.x, out.y, out.z, out.w-180.0)}, 1, false)
+			if v.garage.ped then Parking[#Parking+1] = makePed(v.garage.ped.model, out, 1, 1, v.garage.ped.scenario)
+			else Parking[#Parking+1] = makeProp({prop = `prop_parkingpay`, coords = vector4(out.x, out.y, out.z, out.w-180.0)}, 1, false) end
 			Targets["JobGarage: "..k] =
-			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out[4]+180.0, debugPoly=Config.Debug, minZ=(out.z-1.03)-0.1, maxZ=(out.z-1.03)+1.3 },
+			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out.w+180.0, debugPoly=Config.Debug, minZ=out.z-1.05, maxZ=out.z+0.80 },
 				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = "Job Vehicles", job = v.job, coords = v.garage.spawn, list = v.garage.list, prop = Parking[#Parking] }, },
 				distance = 2.0 })
 		end

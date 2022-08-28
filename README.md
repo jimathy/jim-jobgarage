@@ -54,6 +54,10 @@ Locations = {
 	garage = {
 		spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the vehicle will spawn
 		out = vector4(-177.1, -1282.25, 31.3, 179.01),  -- Where you select the vehicles from
+		ped = { -- Add a "ped" table to make a ped spawn instead of the parking meter
+			model = `G_M_M_ChemWork_01`, -- set ped model here
+			scenario = "WORLD_HUMAN_CLIPBOARD" -- set scenario here
+		},
 		list = {  -- The list of cars that will spawn
 			["cheburek"] = {
 				colors = { 136, 137 }, -- Color index numbers { primary, secondary },

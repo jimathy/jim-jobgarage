@@ -31,6 +31,22 @@ function makeProp(data, freeze, synced)
     return prop
 end
 
+function makePed(model, coords, freeze, collision, scenario, anim)
+	loadModel(model)
+	local ped = CreatePed(0, model, coords.x, coords.y, coords.z-1.03, coords.w, false, false)
+	SetEntityInvincible(ped, true)
+	SetBlockingOfNonTemporaryEvents(ped, true)
+	FreezeEntityPosition(ped, freeze or true)
+    if collision then SetEntityNoCollisionEntity(ped, PlayerPedId(), false) end
+    if scenario then TaskStartScenarioInPlace(ped, scenario, 0, true) end
+    if anim then
+        loadAnimDict(anim[1])
+        TaskPlayAnim(ped, anim[1], anim[2], 1.0, 1.0, -1, 1, 0.2, 0, 0, 0)
+    end
+	if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for location^7: '^6"..model.."^7'") end
+    return ped
+end
+
 function makeBlip(data)
 	local blip = AddBlipForCoord(data.coords)
 	SetBlipAsShortRange(blip, true)
@@ -81,3 +97,5 @@ function triggerNotify(title, message, type, src)
 		else TriggerClientEvent("rr_uilib:Notify", src, {msg = message, type = type, style = "dark", duration = 6000, position = "top-right", }) end
 	end
 end
+
+function toggleItem(give, item, amount)	TriggerServerEvent("jim-vanillaunicorn:server:toggleItem", give, item, amount) end
