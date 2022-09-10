@@ -10,6 +10,11 @@ print("^2Jim^7-^2JobGarage ^2v^41^7.^42 ^7- ^2Job Garage Script by ^1Jimathy^7")
 -- bulletproof = true, -- This determines if the tyres are bullet proof (don't ask me why, I was asked to add this)
 -- livery = 1, -- This sets the livery id of the vehicle, (most mod menus would number them or have them in number order) 0 = stock
 -- extras = { 1, 5 }, -- This enables the selected extras on the vehicle
+-- engine = 4, -- Max:4 Spawn with engine upgrade.
+-- brake = 3, -- Max:3 Spawn with brakes upgrade.
+-- transmission = 3, -- Max:3 Spawn with transmission upgrade.
+-- suspension = 5, -- Max:5 Spawn with suspension upgrade.
+-- armor = true, -- With armor or not. true/false
 
 -- ANY VEHICLE, BOATS, POLICE CARS, EMS VEHICLES OR EVEN PLANES CAN BE ADDED.
 
