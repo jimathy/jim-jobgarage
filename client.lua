@@ -105,6 +105,21 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 					SetVehicleLivery(veh, -1)
 				end
 			end
+			if data.list.engine then
+				SetVehicleMod(veh, 11, data.list.engine-1, false)
+			end
+			if data.list.brake then
+				SetVehicleMod(veh, 12, data.list.brake-1, false)
+			end
+			if data.list.transmission then
+				SetVehicleMod(veh, 13, data.list.transmission-1, false)
+			end
+			if data.list.suspension then
+				SetVehicleMod(veh, 15, data.list.suspension-1, false)
+			end
+			if data.list.armor then
+				SetVehicleMod(veh, 16, 4, false)
+			end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
