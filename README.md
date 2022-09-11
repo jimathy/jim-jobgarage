@@ -45,6 +45,9 @@ ensure [jim]
 	- `bulletproof = true,` This determines if the tyres are bullet proof (don't ask me why, I was asked to add this)
 	- `livery = 1,` This sets the livery id of the vehicle, (most mod menus would number them or have them in number order) 0 = stock
 	- `extras = { 1, 5 },` -- This enables the selected extras on the vehicle
+	- `performance = "max",` -- This sets the car upgrades all to MAX levels
+	- `performance = { 2, 3, 3, 2, 4, true },` -- This allows more specific settings for each upgrade level, in order: engine, brakes, suspension, transmission, armour, turbo
+
 - Example:
 ```lua
 Locations = {

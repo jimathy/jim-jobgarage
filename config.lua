@@ -1,4 +1,4 @@
-print("^2Jim^7-^2JobGarage ^2v^41^7.^42 ^7- ^2Job Garage Script by ^1Jimathy^7")
+print("^2Jim^7-^2JobGarage ^7v^41^7.^43 ^7- ^2Job Garage Script by ^1Jimathy^7")
 
 --[[	LIST OF POSSIBLE VEHICLE MODIFIERS   ]]--
 -- Using these will change how each vehicle spawns
@@ -10,6 +10,8 @@ print("^2Jim^7-^2JobGarage ^2v^41^7.^42 ^7- ^2Job Garage Script by ^1Jimathy^7")
 -- bulletproof = true, -- This determines if the tyres are bullet proof (don't ask me why, I was asked to add this)
 -- livery = 1, -- This sets the livery id of the vehicle, (most mod menus would number them or have them in number order) 0 = stock
 -- extras = { 1, 5 }, -- This enables the selected extras on the vehicle
+-- performance = "max", this sets the stats to max if available
+-- performance = { 2, 3, 3, 2, 4, true }, -- This allows more specific settings for each upgrade level, in order: engine, brakes, suspension, transmission, armour, turbo
 
 -- ANY VEHICLE, BOATS, POLICE CARS, EMS VEHICLES OR EVEN PLANES CAN BE ADDED.
 
@@ -18,40 +20,40 @@ Config = {
 	Notify = "qb",
 	CarDespawn = true, -- Sends the vehicle to hell
 	Locations = {
-		{
-		zoneEnable = true,
-		job = "mechanic",
-		garage = {
-			spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
-			out = vector4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
-			list = {
-				["cheburek"] = {
-					colors = { 136, 137 },
-					grade = 4,
-					livery = 5,
-					bulletproof = true,
-					extras = { 1, 4 },
-				},
-				["burrito3"] = { },
-			},
-		},
-		},
-		{
-		zoneEnable = true,
-		job = "police",
-		garage = {
-			spawn = vector4(435.41, -975.93, 25.31, 90.86),
-			out = vector4(441.39, -974.78, 25.7, 178.49),
-			list = {
-				["police"] = {
-					livery = 5,
-					extras = { 1, 2 },
-				},
-				["fbi"] = {
-					rank = { 4 },
+		{ zoneEnable = true,
+			job = "mechanic",
+			garage = {
+				spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
+				out = vector4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
+				list = {
+					["cheburek"] = {
+						colors = { 136, 137 },
+						grade = 4,
+						livery = 5,
+						bulletproof = true,
+						extras = { 1, 4 },
+					},
+					["burrito3"] = { },
 				},
 			},
 		},
+		{ zoneEnable = true,
+			job = "police",
+			garage = {
+				spawn = vector4(435.41, -975.93, 25.31, 90.86),
+				out = vector4(441.39, -974.78, 25.7, 178.49),
+				list = {
+					["police"] = {
+						livery = 5,
+						extras = { 1, 2 },
+						performance = "max",
+					},
+					["fbi"] = {
+						rank = { 4 },
+						performance = { 2, 3, 3, 2, 4, true },
+					},
+				},
+			},
 		},
 	},
 }

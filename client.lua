@@ -27,9 +27,11 @@ end)
 
 local currentVeh = { out = false, current = nil }
 RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
-	lookEnt(data.prop)
-	loadAnimDict("amb@prop_human_atm@male@enter")
-	TaskPlayAnim(PlayerPedId(), 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 1500, 1, 1, true, true, true)
+	if not IsPedInAnyVehicle(PlayerPedId()) then
+		lookEnt(data.prop)
+		loadAnimDict("amb@prop_human_atm@male@enter")
+		TaskPlayAnim(PlayerPedId(), 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 1500, 1, 1, true, true, true)
+	end
 	local vehicleMenu = { { icon = "fas fa-car-tunnel", header = PlayerJob.label.." ".."Job Garage", isMenuHeader = true } }
 	vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-jobgarage:client:Menu:Close" } }
 	if currentVeh.out and DoesEntityExist(currentVeh.current) then
@@ -103,6 +105,23 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 				else
 					SetVehicleMod(veh, 48, (data.list.livery - 1), false)
 					SetVehicleLivery(veh, -1)
+				end
+			end
+			if data.list.performance then
+				if type(data.list.performance) ~= "table" then
+					SetVehicleMod(veh, 11, GetNumVehicleMods(veh, 11)-1) -- Engine
+					SetVehicleMod(veh, 12, GetNumVehicleMods(veh, 12)-1) -- Brakes
+					SetVehicleMod(veh, 15, GetNumVehicleMods(veh, 15)-1) -- Suspension
+					SetVehicleMod(veh, 13, GetNumVehicleMods(veh, 13)-1) -- Transmission
+					SetVehicleMod(veh, 16, GetNumVehicleMods(veh, 16)-1) -- Armour
+					ToggleVehicleMod(veh, 18, true) -- Turbo
+				else
+					SetVehicleMod(veh, 11, data.list.performance[1]-1) -- Engine
+					SetVehicleMod(veh, 12, data.list.performance[2]-1) -- Brakes
+					SetVehicleMod(veh, 15, data.list.performance[3]-1) -- Suspension
+					SetVehicleMod(veh, 13, data.list.performance[4]-1) -- Transmission
+					SetVehicleMod(veh, 16, data.list.performance[5]-1) -- Armour
+					ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
 				end
 			end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
