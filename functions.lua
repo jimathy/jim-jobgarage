@@ -98,4 +98,11 @@ function triggerNotify(title, message, type, src)
 	end
 end
 
-function toggleItem(give, item, amount)	TriggerServerEvent("jim-vanillaunicorn:server:toggleItem", give, item, amount) end
+function pairsByKeys(t)
+	local a = {}
+	for n in pairs(t) do a[#a+1] = n end
+	table.sort(a)
+	local i = 0
+	local iter = function() i = i + 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end
+	return iter
+end

@@ -1,11 +1,42 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) end)
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
+	FixStash()
+end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 
 AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
+	FixStash()
 end)
+
+function FixStash()
+	for i = 1, #Config.Locations do -- Convert trunk items to usable stashes
+		for k, v in pairs(Config.Locations[i].garage.list) do
+			if v.trunkItems then
+				local items = {}
+				for _, item in pairs(v.trunkItems) do
+					local itemInfo = QBCore.Shared.Items[item.name:lower()]
+					items[item.slot] = {
+						name = itemInfo["name"],
+						amount = tonumber(item.amount),
+						info = item.info,
+						label = itemInfo["label"],
+						description = itemInfo["description"] and itemInfo["description"] or "",
+						weight = itemInfo["weight"],
+						type = itemInfo["type"],
+						unique = itemInfo["unique"],
+						useable = itemInfo["useable"],
+						image = itemInfo["image"],
+						slot = item.slot,
+					}
+				end
+				Config.Locations[i].garage.list[k].trunkItems = items
+			end
+		end
+	end
+end
 
 local Targets = {}
 local Parking = {}
@@ -36,21 +67,24 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 	vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-jobgarage:client:Menu:Close" } }
 	if currentVeh.out and DoesEntityExist(currentVeh.current) then
 		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-clipboard-list", header = "Vehicle out of Garage",
-										txt = "Vehicle: "..GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)).."<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
+										txt = "Vehicle: "..(data.list[GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)):lower()].CustomName or GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)))..
+										"<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
 										params = { event = "jim-jobgarage:client:Garage:Blip", }, }
 		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-car-burst", header = "Remove Vehicle", params = { event = "jim-jobgarage:client:RemSpawn" } }
 	else
 		currentVeh = { out = false, current = nil }
 		table.sort(data.list, function(a, b) return a:lower() < b:lower() end)
-		for k, v in pairs(data.list) do
+		for k, v in pairsByKeys(data.list) do
 			local showButton = false
 			if v.grade then if v.grade <= PlayerJob.grade.level then showButton = true end end
 			if v.rank then for _, b in pairs(v.rank) do if b == PlayerJob.grade.level then showButton = true end end end
 			if not v.grade and not v.rank then showButton = true end
 			if showButton == true then
 				local spawnName = k local spawnHash = GetHashKey(spawnName)
-				if QBCore.Shared.Vehicles[spawnName] then k = QBCore.Shared.Vehicles[spawnName].name.." "..QBCore.Shared.Vehicles[spawnName].brand
-				else k = string.lower(GetDisplayNameFromVehicleModel(spawnHash)) k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(spawnHash)) end
+				if data.list[spawnName].CustomName then k = data.list[spawnName].CustomName else
+					if QBCore.Shared.Vehicles[spawnName] then k = QBCore.Shared.Vehicles[spawnName].name.." "..QBCore.Shared.Vehicles[spawnName].brand
+					else k = string.lower(GetDisplayNameFromVehicleModel(spawnHash)) k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(spawnHash)) end
+				end
 				local classtable = {
 					[8] = "fas fa-motorcycle", -- Motorcycle icon
 					[9] = "fas fa-truck-monster", -- Off Road icon
@@ -76,14 +110,16 @@ end)
 
 RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 	local oldveh = GetClosestVehicle(data.coords.x, data.coords.y, data.coords.z, 2.5, 0, 71)
+	local name = ""
 	if oldveh ~= 0 then
-		local name = GetDisplayNameFromVehicleModel(GetEntityModel(oldveh)):lower()
+		name = GetDisplayNameFromVehicleModel(GetEntityModel(oldveh)):lower()
 		for k, v in pairs(QBCore.Shared.Vehicles) do
 			if tonumber(v.hash) == GetEntityModel(vehicle) then
 				if Config.Debug then print("^5Debug^7: ^2Vehicle^7: ^6"..v.hash.." ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
 				name = QBCore.Shared.Vehicles[k].name
 			end
 		end
+		name = data.list.CustomName or name
 		triggerNotify(nil, name.." in the way", "error")
 	else
 		QBCore.Functions.SpawnVehicle(data.spawnName, function(veh)
@@ -91,6 +127,7 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			SetVehicleModKit(veh, 0)
 			NetworkRequestControlOfEntity(veh)
 			SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
+			--SetVehicleNumberPlateText(veh, "PD-"..QBCore.Functions.GetPlayerData().metadata.callsign)
 			SetEntityHeading(veh, data.coords.w)
 			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
 			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
@@ -124,11 +161,14 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 					ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
 				end
 			end
+			if data.list.trunkItems then TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), data.list.trunkItems) end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+			exports['LegacyFuel']:SetFuel(veh, 100.0)
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
 			SetVehicleDirtLevel(veh, 0.0)
-			triggerNotify(nil, "Retrieved "..GetDisplayNameFromVehicleModel(data.spawnName).." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+			name = data.list.CustomName or name
+			triggerNotify(nil, "Retrieved "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
 		end, data.coords, true)
 	end
 end)
