@@ -63,8 +63,7 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 	vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-jobgarage:client:Menu:Close" } }
 	if currentVeh.out and DoesEntityExist(currentVeh.current) then
 		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-clipboard-list", header = "Vehicle out of Garage",
-										txt = "Vehicle: "..(data.list[GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)):lower()].CustomName or GetDisplayNameFromVehicleModel(GetEntityModel(currentVeh.current)))..
-										"<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
+										txt = "Vehicle: "..currentVeh.name.."<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
 										params = { event = "jim-jobgarage:client:Garage:Blip", }, }
 		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-car-burst", header = "Remove Vehicle", params = { event = "jim-jobgarage:client:RemSpawn" } }
 	else
@@ -77,10 +76,7 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 			if not v.grade and not v.rank then showButton = true end
 			if showButton == true then
 				local spawnName = k local spawnHash = GetHashKey(spawnName)
-				if data.list[spawnName].CustomName then k = data.list[spawnName].CustomName else
-					if QBCore.Shared.Vehicles[spawnName] then k = QBCore.Shared.Vehicles[spawnName].name.." "..QBCore.Shared.Vehicles[spawnName].brand
-					else k = string.lower(GetDisplayNameFromVehicleModel(spawnHash)) k = k:sub(1,1):upper()..k:sub(2).." "..GetMakeNameFromVehicleModel(GetHashKey(spawnHash)) end
-				end
+				--k = data.list[spawnName].CustomName or searchCar(spawnName)
 				local classtable = {
 					[8] = "fas fa-motorcycle", -- Motorcycle icon
 					[9] = "fas fa-truck-monster", -- Off Road icon
@@ -94,7 +90,7 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 					[18] = "fas fa-kit-medical", -- Emergency
 				}
 				local seticon = classtable[GetVehicleClassFromName(spawnHash)] or "fas fa-car"
-				vehicleMenu[#vehicleMenu+1] = { icon = seticon, header = k, params = { event = "jim-jobgarage:client:SpawnList", args = { spawnName = spawnName, coords = data.coords, list = v } } }
+				vehicleMenu[#vehicleMenu+1] = { icon = seticon, header = (data.list[k].CustomName or searchCar(k)), params = { event = "jim-jobgarage:client:SpawnList", args = { spawnName = spawnName, coords = data.coords, list = v } } }
 			end
 		end
 	end
@@ -108,18 +104,12 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 	local oldveh = GetClosestVehicle(data.coords.x, data.coords.y, data.coords.z, 2.5, 0, 71)
 	local name = ""
 	if oldveh ~= 0 then
-		name = GetDisplayNameFromVehicleModel(GetEntityModel(oldveh)):lower()
-		for k, v in pairs(QBCore.Shared.Vehicles) do
-			if tonumber(v.hash) == GetEntityModel(vehicle) then
-				if Config.Debug then print("^5Debug^7: ^2Vehicle^7: ^6"..v.hash.." ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
-				name = QBCore.Shared.Vehicles[k].name
-			end
-		end
-		name = data.list.CustomName or name
+		name = searchCar(GetEntityModel(oldveh))
 		triggerNotify(nil, name.." in the way", "error")
 	else
 		QBCore.Functions.SpawnVehicle(data.spawnName, function(veh)
-			currentVeh = { out = true, current = veh }
+			local name = data.list.CustomName or searchCar(data.spawnName)
+			currentVeh = { out = true, current = veh, name = name }
 			SetVehicleModKit(veh, 0)
 			NetworkRequestControlOfEntity(veh)
 			SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
@@ -163,7 +153,6 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
 			SetVehicleDirtLevel(veh, 0.0)
-			name = data.list.CustomName or name
 			triggerNotify(nil, "Retrieved "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
 		end, data.coords, true)
 	end

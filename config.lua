@@ -1,4 +1,4 @@
-print("^2Jim^7-^2JobGarage ^7v^41^7.^43^7.^41 ^7- ^2Job Garage Script by ^1Jimathy^7")
+print("^2Jim^7-^2JobGarage ^7v^41^7.^43^7.^42 ^7- ^2Job Garage Script by ^1Jimathy^7")
 
 --[[	LIST OF POSSIBLE VEHICLE MODIFIERS   ]]--
 -- Using these will change how each vehicle spawns
@@ -40,6 +40,19 @@ Config = {
 			},
 		},
 		{ 	zoneEnable = true,
+			job = "ambulance",
+			garage = {
+				spawn = vector4(333.57, -588.52, 28.8, 337.84),  -- Where the car will spawn
+				out = vector4(336.54, -589.97, 28.8, 339.19),	-- Where the parking stand is
+				list = {
+					["ambulance"] = {
+						CustomName = "Ambulance"
+					},
+					["burrito3"] = { },
+				},
+			},
+		},
+		{ 	zoneEnable = true,
 			job = "police",
 			garage = {
 				spawn = vector4(435.41, -975.93, 25.31, 90.86),
@@ -59,6 +72,17 @@ Config = {
 					["fbi"] = {
 						rank = { 4 },
 						performance = { 2, 3, 3, 2, 4, true },
+					},
+				},
+			},
+		},
+		{ 	zoneEnable = true,
+			job = "ambulance",
+			garage = {
+				spawn = vector4(294.95, -606.92, 43.24, 64.84),
+				out = vector4(294.54, -599.52, 43.28, 159.68),
+				list = {
+					["Ambulance"] = {
 					},
 				},
 			},

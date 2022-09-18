@@ -1,8 +1,11 @@
+local QBCore = exports['qb-core']:GetCoreObject()
+RegisterNetEvent('QBCore:Client:UpdateObject', function() QBCore = exports['qb-core']:GetCoreObject() end)
+
 local time = 1000
 function loadModel(model) if not HasModelLoaded(model) then
 	if Config.Debug then print("^5Debug^7: ^2Loading Model^7: '^6"..model.."^7'") end
 	while not HasModelLoaded(model) do
-		if time > 0 then time = time - 1 RequestModel(model)
+		if time > 0 then time -= 1 RequestModel(model)
 		else time = 1000 print("^5Debug^7: ^3LoadModel^7: ^2Timed out loading model ^7'^6"..model.."^7'") break
 		end
 		Wait(10)
@@ -81,8 +84,8 @@ end
 
 function triggerNotify(title, message, type, src)
 	if Config.Notify == "okok" then
-		if not src then	exports['okokNotify']:Alert(title, message, 6000, type)
-		else TriggerClientEvent('okokNotify:Alert', src, title, message, 6000, type) end
+		if not src then	exports['okokNotify']:Alert(title, message, 6000, type or 'info')
+		else TriggerClientEvent('okokNotify:Alert', src, title, message, 6000, type or 'info') end
 	elseif Config.Notify == "qb" then
 		if not src then	TriggerEvent("QBCore:Notify", message, type)
 		else TriggerClientEvent("QBCore:Notify", src, message, type) end
@@ -103,6 +106,25 @@ function pairsByKeys(t)
 	for n in pairs(t) do a[#a+1] = n end
 	table.sort(a)
 	local i = 0
-	local iter = function() i = i + 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end
+	local iter = function() i += 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end
 	return iter
+end
+
+function searchCar(vehicle)
+	newName = nil
+	for k, v in pairs(QBCore.Shared.Vehicles) do
+		if tonumber(v.hash) == vehicle then
+		if Config.Debug then print("^5Debug^7: ^2Vehicle info found in^7 ^4vehicles^7.^4lua^7: ^6"..v.hash.. " ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
+		newName = QBCore.Shared.Vehicles[k].name.." "..QBCore.Shared.Vehicles[k].brand
+		end
+	end
+	if Config.Debug then
+		if not newName then print("^5Debug^7: ^2Vehicle ^1not ^2found in ^4vehicles^7.^4lua^7: ^6"..vehicle.." ^7(^6"..GetDisplayNameFromVehicleModel(vehicle):lower().."^7)") end
+	end
+	if not newName then
+		local name = GetDisplayNameFromVehicleModel(vehicle):lower()
+		local brand = GetMakeNameFromVehicleModel(vehicle):lower()
+		newName = name:sub(1,1):upper()..name:sub(2).." "..brand:sub(1,1):upper()..brand:sub(2)
+	end
+	return newName
 end

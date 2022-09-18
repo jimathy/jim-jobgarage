@@ -1,6 +1,6 @@
 name "Jim-JobGarage"
 author "Jimathy"
-version "v1.3.1"
+version "v1.3.2"
 description "Job Garage Script By Jimathy"
 fx_version "cerulean"
 game "gta5"
