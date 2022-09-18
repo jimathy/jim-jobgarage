@@ -40,19 +40,6 @@ Config = {
 			},
 		},
 		{ 	zoneEnable = true,
-			job = "ambulance",
-			garage = {
-				spawn = vector4(333.57, -588.52, 28.8, 337.84),  -- Where the car will spawn
-				out = vector4(336.54, -589.97, 28.8, 339.19),	-- Where the parking stand is
-				list = {
-					["ambulance"] = {
-						CustomName = "Ambulance"
-					},
-					["burrito3"] = { },
-				},
-			},
-		},
-		{ 	zoneEnable = true,
 			job = "police",
 			garage = {
 				spawn = vector4(435.41, -975.93, 25.31, 90.86),
