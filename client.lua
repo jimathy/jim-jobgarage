@@ -2,38 +2,34 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	FixStash()
 end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 
 AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	FixStash()
 end)
 
-function FixStash()
-	for i = 1, #Config.Locations do -- Convert trunk items to usable stashes
-		for k, v in pairs(Config.Locations[i].garage.list) do
-			if v.trunkItems then
-				local items = {}
-				for _, item in pairs(v.trunkItems) do
-					local itemInfo = QBCore.Shared.Items[item.name:lower()]
-					items[item.slot] = {
-						name = itemInfo["name"],
-						amount = tonumber(item.amount),
-						info = item.info,
-						label = itemInfo["label"],
-						description = itemInfo["description"] and itemInfo["description"] or "",
-						weight = itemInfo["weight"],
-						type = itemInfo["type"],
-						unique = itemInfo["unique"],
-						useable = itemInfo["useable"],
-						image = itemInfo["image"],
-						slot = item.slot,
-					}
-				end
-				Config.Locations[i].garage.list[k].trunkItems = items
+for i = 1, #Config.Locations do -- Convert trunk items to usable stashes
+	for k, v in pairs(Config.Locations[i].garage.list) do
+		if v.trunkItems then
+			local items = {}
+			for _, item in pairs(v.trunkItems) do
+				local itemInfo = QBCore.Shared.Items[item.name:lower()]
+				items[item.slot] = {
+					name = itemInfo["name"],
+					amount = tonumber(item.amount),
+					info = item.info,
+					label = itemInfo["label"],
+					description = itemInfo["description"] and itemInfo["description"] or "",
+					weight = itemInfo["weight"],
+					type = itemInfo["type"],
+					unique = itemInfo["unique"],
+					useable = itemInfo["useable"],
+					image = itemInfo["image"],
+					slot = item.slot,
+				}
 			end
+			Config.Locations[i].garage.list[k].trunkItems = items
 		end
 	end
 end
