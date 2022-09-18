@@ -69,7 +69,8 @@ Config = {
 				spawn = vector4(294.95, -606.92, 43.24, 64.84),
 				out = vector4(294.54, -599.52, 43.28, 159.68),
 				list = {
-					["Ambulance"] = {
+					["ambulance"] = {
+						CustomName = "Ambulance"
 					},
 				},
 			},
