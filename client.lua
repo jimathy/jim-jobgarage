@@ -1,9 +1,9 @@
 local QBCore = exports[Config.Core]:GetCoreObject()
 
 local Targets, Parking, PlayerJob = {}, {}, {}
-local Locations = Config.Locations
+local Locations = {}
 
-local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end for i = 1, #Parking do print(Parking[i]) DeleteEntity(Parking[i]) Wait(10) end end
+local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end for i = 1, #Parking do DeleteEntity(Parking[i]) Wait(10) end end
 local function makeTargets()
 	removeTargets()
 	for i = 1, #Locations do
@@ -44,13 +44,13 @@ RegisterNetEvent("jim-jobgarage:client:syncLocations", function(newLocations) Lo
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	TriggerServerEvent("jim-jobgarage:server:syncLocations")
+	Wait(3000) TriggerServerEvent("jim-jobgarage:server:syncLocations")
 end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 
 AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	TriggerServerEvent("jim-jobgarage:server:syncLocations")
+	Wait(3000) TriggerServerEvent("jim-jobgarage:server:syncLocations")
 end)
 
 local currentVeh = { out = false, current = nil }

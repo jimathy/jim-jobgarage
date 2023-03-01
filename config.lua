@@ -1,4 +1,4 @@
-print("^2Jim^7-^2JobGarage ^7v^41^7.^44 ^7- ^2Job Garage Script by ^1Jimathy^7")
+print("^2Jim^7-^2JobGarage ^7v^41^7.^44^7.^41 ^7- ^2Job Garage Script by ^1Jimathy^7")
 
 Loc = {}
 
@@ -39,23 +39,6 @@ Config = {
 			garage = {
 				spawn = vec4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
 				out = vec4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
-				list = {
-					["cheburek"] = {
-						colors = { 136, 137 },
-						grade = 4,
-						livery = 5,
-						bulletproof = true,
-						extras = { 1, 4 },
-					},
-					["burrito3"] = { },
-				},
-			},
-		},
-		{ 	zoneEnable = true,
-			job = "mechanic",
-			garage = {
-				spawn = vec4(-319.16, 6256.92, 31.0, 225.23),
-				out = vec4(-317.12, 6263.83, 31.49, 135.54),
 				list = {
 					["cheburek"] = {
 						colors = { 136, 137 },

@@ -19,7 +19,7 @@ https://ko-fi.com/jixelpatterns
 # Installation
 
 - I always recommend starting my scripts **AFTER** `[qb]` not inside it as it can mess with any dependancies on server load
-- I have a separate folder called `[jim]` (that is also in the resources folder) that starts WAY after everything else.
+- I have a separate folder called `[jimextras]` (that is also in the resources folder) that starts before any scripts would use it.
 - This ensure's it has everything it requires before trying to load
 - Example of my load order:
 ```CSS
@@ -32,6 +32,7 @@ ensure [defaultmaps]
 ensure [vehicles]
 
 # Extra Jim Stuff
+ensure [jimextras]
 ensure [jim]
 ```
 
@@ -80,3 +81,41 @@ Locations = {
 	},
 },
 ```
+- This can also be used to add new locations
+```lua
+TriggerServerEvent("jim-jobgarage:server:syncAddLocations", {
+job = "mechanic",
+garage = {
+		spawn = vec4(-179.34, -1285.27, 30.83, 89.24),
+		out = vec4(-177.1, -1282.25, 31.3, 179.01),
+		ped = {
+			model = `G_M_M_ChemWork_01`,
+			scenario = "WORLD_HUMAN_CLIPBOARD"
+		},
+		list = {
+			["cheburek"] = {
+				CustomName = "Police Car",
+				colors = { 136, 137 },
+				grade = 4,
+				performance = { 2, 3, 3, 2, 4, true },
+				trunkItems = {
+					{ name = "heavyarmor", amount = 2, info = {}, type = "item", slot = 1, },
+					{ name = "empty_evidence_bag", amount = 10, info = {}, type = "item", slot = 2, },
+					{ name = "police_stormram", amount = 1, info = {}, type = "item", slot = 3, },
+				},
+			},
+			["burrito3"] = { },
+		},
+	},
+})
+```
+
+# Changelog
+## v1.4.1:
+	- Fix script not retrieving external locations on playerload
+
+## v1.4:
+	- Locale support
+	- Support for OX_Lib context menu
+	- Trunk items fix
+	- Add ability to add garages from other scripts on the fly
