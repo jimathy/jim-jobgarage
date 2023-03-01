@@ -1,11 +1,19 @@
+local QBCore = exports[Config.Core]:GetCoreObject()
+
 local Locations = Config.Locations
+
+QBCore.Functions.CreateCallback('jim-jobgarage:server:syncLocations', function(source, cb) cb(Locations) end)
 
 RegisterNetEvent('jim-jobgarage:server:syncAddLocations', function(data)
 	Locations[#Locations+1] = { zoneEnable = true, job = data.job, garage = data.garage, }
+	if Config.Debug then
+		local coords = { string.format("%.2f", data.garage.out.x), string.format("%.2f", data.garage.out.y), string.format("%.2f", data.garage.out.z), (string.format("%.2f", data.garage.out.w or 0.0)) }
+		print("^5Debug^7: ^2Adding new ^3JobGarage^2 location^7: ^5vec4^7(^6"..(coords[1]).."^7, ^6"..(coords[2]).."^7, ^6"..(coords[3]).."^7, ^6"..(coords[4]).."^7)")
+	end
 	TriggerClientEvent("jim-jobgarage:client:syncLocations", -1, Locations)
 end)
 
-RegisterNetEvent("jim-jobgarage:server:syncLocations", function() print("Syncing Locations") TriggerClientEvent('jim-jobgarage:client:syncLocations', -1, Locations) end)
+RegisterNetEvent("jim-jobgarage:server:syncLocations", function() TriggerClientEvent('jim-jobgarage:client:syncLocations', -1, Locations) end)
 
 RegisterNetEvent("jim-jobgarage:server:addTrunkItems", function(plate, items) exports["qb-inventory"]:addTrunkItems(plate, items) end)
 

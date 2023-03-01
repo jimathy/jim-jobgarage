@@ -83,7 +83,7 @@ Locations = {
 ```
 - This can also be used to add new locations
 ```lua
-TriggerServerEvent("jim-jobgarage:server:syncAddLocations", {
+TriggerEvent("jim-jobgarage:server:syncAddLocations", {
 job = "mechanic",
 garage = {
 		spawn = vec4(-179.34, -1285.27, 30.83, 89.24),
@@ -111,6 +111,9 @@ garage = {
 ```
 
 # Changelog
+## v1.4.2:
+    - Now with less errors and real setup info
+
 ## v1.4.1:
 	- Fix script not retrieving external locations on playerload
 

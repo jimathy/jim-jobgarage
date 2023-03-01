@@ -106,7 +106,6 @@ end
 function pairsByKeys(t) local a = {} for n in pairs(t) do a[#a+1] = n end table.sort(a) local i = 0 local iter = function() i += 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end return iter end
 
 function searchCar(vehicle)
-	print(vehicle)
 	local newName = nil
 	for k, v in pairs(QBCore.Shared.Vehicles) do
 		if tonumber(v.hash) == GetHashKey(vehicle) then
