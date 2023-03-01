@@ -1,4 +1,6 @@
-print("^2Jim^7-^2JobGarage ^7v^41^7.^43^7.^42 ^7- ^2Job Garage Script by ^1Jimathy^7")
+print("^2Jim^7-^2JobGarage ^7v^41^7.^44 ^7- ^2Job Garage Script by ^1Jimathy^7")
+
+Loc = {}
 
 --[[	LIST OF POSSIBLE VEHICLE MODIFIERS   ]]--
 -- Using these will change how each vehicle spawns
@@ -19,14 +21,41 @@ print("^2Jim^7-^2JobGarage ^7v^41^7.^43^7.^42 ^7- ^2Job Garage Script by ^1Jimat
 
 Config = {
 	Debug = false,  -- Enable to use debug features
+	Lan = "en",
+
+	Core = "qb-core",
+	Menu = "qb",
 	Notify = "qb",
-	CarDespawn = true, -- Sends the vehicle to hell
+
+	Fuel = "LegacyFuel", -- Set this to your fuel script folder
+
+	CarDespawn = true, -- Sends the vehicle to hell (removal animation)
+
+	DistCheck = false, -- Require the vehicle to be near by to remove it
+
 	Locations = {
 		{ 	zoneEnable = true,
 			job = "mechanic",
 			garage = {
-				spawn = vector4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
-				out = vector4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
+				spawn = vec4(-179.34, -1285.27, 30.83, 89.24),  -- Where the car will spawn
+				out = vec4(-177.1, -1282.25, 31.3, 179.01),	-- Where the parking stand is
+				list = {
+					["cheburek"] = {
+						colors = { 136, 137 },
+						grade = 4,
+						livery = 5,
+						bulletproof = true,
+						extras = { 1, 4 },
+					},
+					["burrito3"] = { },
+				},
+			},
+		},
+		{ 	zoneEnable = true,
+			job = "mechanic",
+			garage = {
+				spawn = vec4(-319.16, 6256.92, 31.0, 225.23),
+				out = vec4(-317.12, 6263.83, 31.49, 135.54),
 				list = {
 					["cheburek"] = {
 						colors = { 136, 137 },
@@ -42,8 +71,8 @@ Config = {
 		{ 	zoneEnable = true,
 			job = "police",
 			garage = {
-				spawn = vector4(435.41, -975.93, 25.31, 90.86),
-				out = vector4(441.39, -974.78, 25.7, 178.49),
+				spawn = vec4(435.41, -975.93, 25.31, 90.86),
+				out = vec4(441.39, -974.78, 25.7, 178.49),
 				list = {
 					["police"] = {
 						CustomName = "Police Car",
@@ -66,8 +95,8 @@ Config = {
 		{ 	zoneEnable = true,
 			job = "ambulance",
 			garage = {
-				spawn = vector4(294.95, -606.92, 43.24, 64.84),
-				out = vector4(294.54, -599.52, 43.28, 159.68),
+				spawn = vec4(294.95, -606.92, 43.24, 64.84),
+				out = vec4(294.54, -599.52, 43.28, 159.68),
 				list = {
 					["ambulance"] = {
 						CustomName = "Ambulance"

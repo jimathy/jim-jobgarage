@@ -1,12 +1,11 @@
 name "Jim-JobGarage"
 author "Jimathy"
-version "v1.3.2"
+version "1.4"
 description "Job Garage Script By Jimathy"
 fx_version "cerulean"
 game "gta5"
+lua54 'yes'
 
+shared_scripts { 'config.lua', 'functions.lua', 'locales/*.lua' }
 client_scripts { 'client.lua', }
 server_scripts { 'server.lua', }
-shared_scripts { 'config.lua', 'functions.lua' }
-
-lua54 'yes'

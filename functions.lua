@@ -1,36 +1,49 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-RegisterNetEvent('QBCore:Client:UpdateObject', function() QBCore = exports['qb-core']:GetCoreObject() end)
+local QBCore = exports[Config.Core]:GetCoreObject()
 
 local time = 1000
 function loadModel(model) if not HasModelLoaded(model) then
-	if Config.Debug then print("^5Debug^7: ^2Loading Model^7: '^6"..model.."^7'") end
-	while not HasModelLoaded(model) do
-		if time > 0 then time -= 1 RequestModel(model)
-		else time = 1000 print("^5Debug^7: ^3LoadModel^7: ^2Timed out loading model ^7'^6"..model.."^7'") break
+	if Config.Debug then print("^5Debug^7: ^3loadModel^7(): ^2Loading Model^7: '^6"..model.."^7'") end
+		while not HasModelLoaded(model) do
+			if time > 0 then time = time - 1 RequestModel(model)
+			else time = 1000 print("^5Debug^7: ^3loadModel^7(): ^2Timed out loading model ^7'^6"..model.."^7'") break
+			end
+			Wait(10)
 		end
-		Wait(10)
 	end
-end end
+end
 function unloadModel(model) if Config.Debug then print("^5Debug^7: ^2Removing Model^7: '^6"..model.."^7'") end SetModelAsNoLongerNeeded(model) end
-function loadAnimDict(dict)	if not HasAnimDictLoaded(dict) then if Config.Debug then print("^5Debug^7: ^2Loading Anim Dictionary^7: '^6"..dict.."^7'") end while not HasAnimDictLoaded(dict) do RequestAnimDict(dict) Wait(5) end end end
+function loadAnimDict(dict) if Config.Debug then print("^5Debug^7: ^2Loading Anim Dictionary^7: '^6"..dict.."^7'") end while not HasAnimDictLoaded(dict) do RequestAnimDict(dict) Wait(5) end end
 function unloadAnimDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing Anim Dictionary^7: '^6"..dict.."^7'") end RemoveAnimDict(dict) end
-function loadPtfxDict(dict)	if not HasNamedPtfxAssetLoaded(dict) then if Config.Debug then print("^5Debug^7: ^2Loading Ptfx Dictionary^7: '^6"..dict.."^7'") end while not HasNamedPtfxAssetLoaded(dict) do RequestNamedPtfxAsset(dict) Wait(5) end end end
+function loadPtfxDict(dict)	if Config.Debug then print("^5Debug^7: ^2Loading Ptfx Dictionary^7: '^6"..dict.."^7'") end while not HasNamedPtfxAssetLoaded(dict) do RequestNamedPtfxAsset(dict) Wait(5) end end
 function unloadPtfxDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing Ptfx Dictionary^7: '^6"..dict.."^7'") end RemoveNamedPtfxAsset(dict) end
 
-
-function destroyProp(entity)
-	if Config.Debug then print("^5Debug^7: ^2Destroying Prop^7: '^6"..entity.."^7'") end
-	SetEntityAsMissionEntity(entity) Wait(5)
-	DetachEntity(entity, true, true) Wait(5)
-	DeleteEntity(entity)
+function lookEnt(entity)
+	if type(entity) == "vector3" then
+		if not IsPedHeadingTowardsPosition(PlayerPedId(), entity, 10.0) then
+			TaskTurnPedToFaceCoord(PlayerPedId(), entity, 1500)
+			if Config.Debug then print("^5Debug^7: ^3lookEnt^7(): ^2Turning Player to^7: '^6"..json.encode(entity).."^7'") end
+			Wait(1500)
+		end
+	else
+		if DoesEntityExist(entity) then
+			if not IsPedHeadingTowardsPosition(PlayerPedId(), GetEntityCoords(entity), 30.0) then
+				TaskTurnPedToFaceCoord(PlayerPedId(), GetEntityCoords(entity), 1500)
+				if Config.Debug then print("^5Debug^7: ^3lookEnt^7(): ^2Turning Player to^7: '^6"..entity.."^7'") end
+				Wait(1500)
+			end
+		end
+	end
 end
 
 function makeProp(data, freeze, synced)
     loadModel(data.prop)
-    local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z-1.03, synced or 0, synced or false, false)
+    local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z-1.03, synced or false, synced or false, false)
     SetEntityHeading(prop, data.coords.w)
     FreezeEntityPosition(prop, freeze or 0)
-    if Config.Debug then print("^5Debug^7: ^6Prop ^2Created ^7: '^6"..prop.."^7'") end
+	if Config.Debug then
+		local coords = { string.format("%.2f", data.coords.x), string.format("%.2f", data.coords.y), string.format("%.2f", data.coords.z), (string.format("%.2f", data.coords.w or 0.0)) }
+		print("^5Debug^7: ^1Prop ^2Created^7: '^6"..prop.."^7' | ^2Hash^7: ^7'^6"..(data.prop).."^7' | ^2Coord^7: ^5vec4^7(^6"..(coords[1]).."^7, ^6"..(coords[2]).."^7, ^6"..(coords[3]).."^7, ^6"..(coords[4]).."^7)")
+	end
     return prop
 end
 
@@ -46,7 +59,10 @@ function makePed(model, coords, freeze, collision, scenario, anim)
         loadAnimDict(anim[1])
         TaskPlayAnim(ped, anim[1], anim[2], 1.0, 1.0, -1, 1, 0.2, 0, 0, 0)
     end
-	if Config.Debug then print("^5Debug^7: ^6Ped ^2Created for location^7: '^6"..model.."^7'") end
+	if Config.Debug then
+		local coords = { string.format("%.2f", coords.x), string.format("%.2f", coords.y), string.format("%.2f", coords.z), (string.format("%.2f", coords.w or 0.0)) }
+		print("^5Debug^7: ^1Ped ^2Created^7: '^6"..ped.."^7' | ^2Hash^7: ^7'^6"..(model).."^7' | ^2Coord^7: ^5vec4^7(^6"..(coords[1]).."^7, ^6"..(coords[2]).."^7, ^6"..(coords[3]).."^7, ^6"..(coords[4]).."^7)")
+	end
     return ped
 end
 
@@ -57,6 +73,7 @@ function makeBlip(data)
 	SetBlipColour(blip, data.col or 0)
 	SetBlipScale(blip, data.scale or 0.7)
 	SetBlipDisplay(blip, (data.disp or 6))
+    if data.category then SetBlipCategory(blip, data.category) end
 	BeginTextCommandSetBlipName('STRING')
 	AddTextComponentString(tostring(data.name))
 	EndTextCommandSetBlipName(blip)
@@ -64,28 +81,10 @@ function makeBlip(data)
     return blip
 end
 
-function lookEnt(entity)
-	if type(entity) == "vector3" then
-		if not IsPedHeadingTowardsPosition(PlayerPedId(), entity, 10.0) then
-			TaskTurnPedToFaceCoord(PlayerPedId(), entity, 1500)
-			if Config.Debug then print("^5Debug^7: ^2Turning Player to^7: '^6"..json.encode(entity).."^7'") end
-			Wait(1500)
-		end
-	else
-		if DoesEntityExist(entity) then
-			if not IsPedHeadingTowardsPosition(PlayerPedId(), GetEntityCoords(entity), 30.0) then
-				TaskTurnPedToFaceCoord(PlayerPedId(), GetEntityCoords(entity), 1500)
-				if Config.Debug then print("^5Debug^7: ^2Turning Player to^7: '^6"..entity.."^7'") end
-				Wait(1500)
-			end
-		end
-	end
-end
-
 function triggerNotify(title, message, type, src)
 	if Config.Notify == "okok" then
-		if not src then	exports['okokNotify']:Alert(title, message, 6000, type or 'info')
-		else TriggerClientEvent('okokNotify:Alert', src, title, message, 6000, type or 'info') end
+		if not src then	exports['okokNotify']:Alert(title, message, 6000, type)
+		else TriggerClientEvent('okokNotify:Alert', src, title, message, 6000, type) end
 	elseif Config.Notify == "qb" then
 		if not src then	TriggerEvent("QBCore:Notify", message, type)
 		else TriggerClientEvent("QBCore:Notify", src, message, type) end
@@ -98,22 +97,19 @@ function triggerNotify(title, message, type, src)
 	elseif Config.Notify == "rr" then
 		if not src then exports.rr_uilib:Notify({msg = message, type = type, style = "dark", duration = 6000, position = "top-right", })
 		else TriggerClientEvent("rr_uilib:Notify", src, {msg = message, type = type, style = "dark", duration = 6000, position = "top-right", }) end
+	elseif Config.Notify == "ox" then
+		if not src then	exports.ox_lib:notify({title = title, description = message, type = type or "success"})
+		else exports.ox_lib:notify({title = title, description = message, type = type or "success"}) end
 	end
 end
 
-function pairsByKeys(t)
-	local a = {}
-	for n in pairs(t) do a[#a+1] = n end
-	table.sort(a)
-	local i = 0
-	local iter = function() i += 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end
-	return iter
-end
+function pairsByKeys(t) local a = {} for n in pairs(t) do a[#a+1] = n end table.sort(a) local i = 0 local iter = function() i += 1 if a[i] == nil then return nil else return a[i], t[a[i]] end end return iter end
 
 function searchCar(vehicle)
-	newName = nil
+	print(vehicle)
+	local newName = nil
 	for k, v in pairs(QBCore.Shared.Vehicles) do
-		if tonumber(v.hash) == vehicle then
+		if tonumber(v.hash) == GetHashKey(vehicle) then
 		if Config.Debug then print("^5Debug^7: ^2Vehicle info found in^7 ^4vehicles^7.^4lua^7: ^6"..v.hash.. " ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
 		newName = QBCore.Shared.Vehicles[k].name.." "..QBCore.Shared.Vehicles[k].brand
 		end

@@ -1,55 +1,56 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports[Config.Core]:GetCoreObject()
+
+local Targets, Parking, PlayerJob = {}, {}, {}
+local Locations = Config.Locations
+
+local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end for i = 1, #Parking do print(Parking[i]) DeleteEntity(Parking[i]) Wait(10) end end
+local function makeTargets()
+	removeTargets()
+	for i = 1, #Locations do
+		if Locations[i].garage then
+			if Locations[i].trunkItems then
+				local items = {}
+				for _, item in pairs(Locations[i].trunkItems) do
+					local itemInfo = QBCore.Shared.Items[item.name:lower()]
+					items[item.slot] = {
+						name = itemInfo["name"],
+						amount = tonumber(item.amount),
+						info = item.info,
+						label = itemInfo["label"],
+						description = itemInfo["description"] and itemInfo["description"] or "",
+						weight = itemInfo["weight"],
+						type = itemInfo["type"],
+						unique = itemInfo["unique"],
+						useable = itemInfo["useable"],
+						image = itemInfo["image"],
+						slot = item.slot,
+					}
+				end
+				Locations[i].garage.list[k].trunkItems = items
+			end
+
+			local out = Locations[i].garage.out
+			if Locations[i].garage.ped then Parking[#Parking+1] = makePed(Locations[i].garage.ped.model, out, 1, 1, Locations[i].garage.ped.scenario)
+			else Parking[#Parking+1] = makeProp({prop = "prop_parkingpay", coords = vec4(out.x, out.y, out.z, out.w-180.0)}, true, false) end
+			Targets["JobGarage: "..i] =
+				exports['qb-target']:AddBoxZone("JobGarage: "..i, vec3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..i, heading = out.w+180.0, debugPoly=Config.Debug, minZ=out.z-1.05, maxZ=out.z+0.80 },
+					{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = Loc[Config.Lan].target["label"], job = Locations[i].job, spawncoords = Locations[i].garage.spawn, list = Locations[i].garage.list, prop = Parking[#Parking] }, },
+					distance = 2.0 })
+		end
+	end
+end
+
+RegisterNetEvent("jim-jobgarage:client:syncLocations", function(newLocations) Locations = newLocations makeTargets() end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
+	TriggerServerEvent("jim-jobgarage:server:syncLocations")
 end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
 
 AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end
 	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-end)
-
-for i = 1, #Config.Locations do -- Convert trunk items to usable stashes
-	for k, v in pairs(Config.Locations[i].garage.list) do
-		if v.trunkItems then
-			local items = {}
-			for _, item in pairs(v.trunkItems) do
-				local itemInfo = QBCore.Shared.Items[item.name:lower()]
-				items[item.slot] = {
-					name = itemInfo["name"],
-					amount = tonumber(item.amount),
-					info = item.info,
-					label = itemInfo["label"],
-					description = itemInfo["description"] and itemInfo["description"] or "",
-					weight = itemInfo["weight"],
-					type = itemInfo["type"],
-					unique = itemInfo["unique"],
-					useable = itemInfo["useable"],
-					image = itemInfo["image"],
-					slot = item.slot,
-				}
-			end
-			Config.Locations[i].garage.list[k].trunkItems = items
-		end
-	end
-end
-
-local Targets = {}
-local Parking = {}
-
---Garage Locations
-CreateThread(function()
-	for k, v in pairs(Config.Locations) do
-		if v.garage then
-			local out = v.garage.out
-			if v.garage.ped then Parking[#Parking+1] = makePed(v.garage.ped.model, out, 1, 1, v.garage.ped.scenario)
-			else Parking[#Parking+1] = makeProp({prop = `prop_parkingpay`, coords = vector4(out.x, out.y, out.z, out.w-180.0)}, 1, false) end
-			Targets["JobGarage: "..k] =
-			exports['qb-target']:AddBoxZone("JobGarage: "..k, vector3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..k, heading = out.w+180.0, debugPoly=Config.Debug, minZ=out.z-1.05, maxZ=out.z+0.80 },
-				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = "Job Vehicles", job = v.job, coords = v.garage.spawn, list = v.garage.list, prop = Parking[#Parking] }, },
-				distance = 2.0 })
-		end
-	end
+	TriggerServerEvent("jim-jobgarage:server:syncLocations")
 end)
 
 local currentVeh = { out = false, current = nil }
@@ -59,13 +60,30 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 		loadAnimDict("amb@prop_human_atm@male@enter")
 		TaskPlayAnim(PlayerPedId(), 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 1500, 1, 1, true, true, true)
 	end
-	local vehicleMenu = { { icon = "fas fa-car-tunnel", header = PlayerJob.label.." ".."Job Garage", isMenuHeader = true } }
-	vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-circle-xmark", header = "", txt = "Close", params = { event = "jim-jobgarage:client:Menu:Close" } }
+	local vehicleMenu = {}
+	if Config.Menu == "qb" then
+		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-car-tunnel", header = PlayerJob.label.." "..Loc[Config.Lan].menu["jobtitle"], isMenuHeader = true }
+		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-circle-xmark", header = "", txt = Loc[Config.Lan].menu["close"], params = { event = "jim-jobgarage:client:Menu:Close" } }
+	end
 	if currentVeh.out and DoesEntityExist(currentVeh.current) then
-		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-clipboard-list", header = "Vehicle out of Garage",
-										txt = "Vehicle: "..currentVeh.name.."<br> Plate: ["..GetVehicleNumberPlateText(currentVeh.current).."]",
-										params = { event = "jim-jobgarage:client:Garage:Blip", }, }
-		vehicleMenu[#vehicleMenu+1] = { icon = "fas fa-car-burst", header = "Remove Vehicle", params = { event = "jim-jobgarage:client:RemSpawn" } }
+		vehicleMenu[#vehicleMenu+1] = {
+			icon = "fas fa-clipboard-list",
+			header = "Vehicle out of Garage", txt = Loc[Config.Lan].menu["vehicle"].." ["..currentVeh.name.."<br> "..Loc[Config.Lan].menu["plate"].." ["..GetVehicleNumberPlateText(currentVeh.current).."]",
+			title = "Vehicle out of Garage", description = Loc[Config.Lan].menu["vehicle"].." ["..currentVeh.name.."\n "..Loc[Config.Lan].menu["plate"].." ["..GetVehicleNumberPlateText(currentVeh.current).."]",
+			event = "jim-jobgarage:client:Garage:Blip",
+			params = { event = "jim-jobgarage:client:Garage:Blip", },
+		}
+		local carLoc, playerLoc = GetEntityCoords(currentVeh.current), GetEntityCoords(PlayerPedId())
+		local dist = #(carLoc - playerLoc)
+		if (Config.distCheck and dist <= 30.0) or not Config.distCheck then
+			vehicleMenu[#vehicleMenu+1] = {
+				icon = "fas fa-car-burst",
+				header = Loc[Config.Lan].menu["remvehicle"],
+				title = Loc[Config.Lan].menu["remvehicle"],
+				event = "jim-jobgarage:client:RemSpawn",
+				params = { event = "jim-jobgarage:client:RemSpawn" }
+			}
+		end
 	else
 		currentVeh = { out = false, current = nil }
 		table.sort(data.list, function(a, b) return a:lower() < b:lower() end)
@@ -76,7 +94,6 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 			if not v.grade and not v.rank then showButton = true end
 			if showButton == true then
 				local spawnName = k local spawnHash = GetHashKey(spawnName)
-				--k = data.list[spawnName].CustomName or searchCar(spawnName)
 				local classtable = {
 					[8] = "fas fa-motorcycle", -- Motorcycle icon
 					[9] = "fas fa-truck-monster", -- Off Road icon
@@ -90,22 +107,32 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 					[18] = "fas fa-kit-medical", -- Emergency
 				}
 				local seticon = classtable[GetVehicleClassFromName(spawnHash)] or "fas fa-car"
-				vehicleMenu[#vehicleMenu+1] = { icon = seticon, header = (data.list[k].CustomName or searchCar(k)), params = { event = "jim-jobgarage:client:SpawnList", args = { spawnName = spawnName, coords = data.coords, list = v } } }
+				vehicleMenu[#vehicleMenu+1] = {
+					icon = seticon,
+					header = (data.list[k].CustomName or searchCar(k)),
+					title = (data.list[k].CustomName or searchCar(k)),
+					event = "jim-jobgarage:client:SpawnList", args = { spawnName = spawnName, spawncoords = data.spawncoords, list = v },
+					params = { event = "jim-jobgarage:client:SpawnList", args = { spawnName = spawnName, spawncoords = data.spawncoords, list = v } }
+				}
 			end
 		end
 	end
 	showButton = nil
-	if #vehicleMenu <= 2 then triggerNotify(nil, "No vehicles available") return end
-    exports['qb-menu']:openMenu(vehicleMenu)
+	if Config.Menu == "ox" then
+		exports.ox_lib:registerContext({id = 'vehicleMenu', title = PlayerJob.label.." "..Loc[Config.Lan].menu["jobtitle"], position = 'top-right', options = vehicleMenu })
+		exports.ox_lib:showContext("vehicleMenu")
+	elseif Config.Menu == "qb" then
+		exports['qb-menu']:openMenu(vehicleMenu)
+	end
 	unloadAnimDict("amb@prop_human_atm@male@enter")
 end)
 
 RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
-	local oldveh = GetClosestVehicle(data.coords.x, data.coords.y, data.coords.z, 2.5, 0, 71)
+	local oldveh = GetClosestVehicle(data.spawncoords.x, data.spawncoords.y, data.spawncoords.z, 2.5, 0, 71)
 	local name = ""
 	if oldveh ~= 0 then
 		name = searchCar(GetEntityModel(oldveh))
-		triggerNotify(nil, name.." in the way", "error")
+		triggerNotify(nil, name.." "..Loc[Config.Lan].error["vehclose"], "error")
 	else
 		QBCore.Functions.SpawnVehicle(data.spawnName, function(veh)
 			local name = data.list.CustomName or searchCar(data.spawnName)
@@ -114,7 +141,7 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			NetworkRequestControlOfEntity(veh)
 			SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
 			--SetVehicleNumberPlateText(veh, "PD-"..QBCore.Functions.GetPlayerData().metadata.callsign)
-			SetEntityHeading(veh, data.coords.w)
+			SetEntityHeading(veh, data.spawncoords.w)
 			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
 			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
 			if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
@@ -147,14 +174,14 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 					ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
 				end
 			end
-			if data.list.trunkItems then TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), data.list.trunkItems) end
+			if data.list.trunkItems then TriggerServerEvent("jim-jobgarage:server:addTrunkItems", QBCore.Functions.GetPlate(veh), data.list.trunkItems) end
 			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-			exports['LegacyFuel']:SetFuel(veh, 100.0)
+			exports[Config.Fuel]:SetFuel(veh, 100.0)
 			SetVehicleEngineOn(veh, true, true)
 			Wait(250)
 			SetVehicleDirtLevel(veh, 0.0)
-			triggerNotify(nil, "Retrieved "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
-		end, data.coords, true)
+			triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+		end, data.spawncoords, true)
 	end
 end)
 
@@ -172,7 +199,7 @@ end)
 
 local markerOn = false
 RegisterNetEvent("jim-jobgarage:client:Garage:Blip", function(data)
-	triggerNotify(nil, "Job Vehicle Marked on Map")
+	triggerNotify(nil, Loc[Config.Lan].success["blipcreate"], "success")
 	if markerOn then markerOn = not markerOn end
 	markerOn = true
 	if not DoesBlipExist(garageBlip) then
@@ -202,6 +229,8 @@ RegisterNetEvent("jim-jobgarage:client:Garage:Blip", function(data)
 end)
 
 AddEventHandler('onResourceStop', function(r) if r ~= GetCurrentResourceName() then return end
-	for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end
-	for i = 1, #Parking do unloadModel(GetEntityModel(Parking[i])) DeleteEntity(Parking[i]) end
+	if GetResourceState("qb-target") == "started" or GetResourceState("ox_target") == "started" then
+		for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end
+		for i = 1, #Parking do unloadModel(GetEntityModel(Parking[i])) DeleteEntity(Parking[i]) end
+	end
 end)
