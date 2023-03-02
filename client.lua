@@ -3,7 +3,7 @@ local QBCore = exports[Config.Core]:GetCoreObject()
 local Targets, Parking, PlayerJob = {}, {}, {}
 local Locations = {}
 
-local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end Targets = {} for i = 1, #Parking do DeleteEntity(Parking[i]) Parking = {} Wait(10) end end
+local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end Targets = {} for i = 1, #Parking do DeleteEntity(Parking[i]) Wait(10) end Parking = {}  end
 local function makeTargets()
 	removeTargets()
 	for i = 1, #Locations do
