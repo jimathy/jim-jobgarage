@@ -1,7 +1,6 @@
 local QBCore = exports[Config.Core]:GetCoreObject()
 
-local Targets, Parking, PlayerJob = {}, {}, {}
-local Locations = {}
+local Targets, Parking, PlayerJob, Locations = {}, {}, {}, {}
 
 local function removeTargets() for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end Targets = {} for i = 1, #Parking do DeleteEntity(Parking[i]) Wait(10) end Parking = {}  end
 local function makeTargets()
@@ -40,25 +39,12 @@ local function makeTargets()
 	end
 end
 
-local function syncLocations()
-	local p = promise.new()
-	QBCore.Functions.TriggerCallback('jim-jobgarage:server:syncLocations', function(cb) p:resolve(cb) end)
-	Locations = Citizen.Await(p)
-	makeTargets()
-end
+local function syncLocations() local p = promise.new() QBCore.Functions.TriggerCallback('jim-jobgarage:server:syncLocations', function(cb) p:resolve(cb) end) Locations = Citizen.Await(p) makeTargets() end
 
 RegisterNetEvent("jim-jobgarage:client:syncLocations", function(newLocations) Locations = newLocations makeTargets() end)
-
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	Wait(10000) syncLocations()
-end)
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)	Wait(10000) syncLocations() end)
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
-
-AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end
-	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)
-	Wait(10000) syncLocations()
-end)
+AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) Wait(10000) syncLocations() end)
 
 local currentVeh = { out = false, current = nil }
 RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
