@@ -138,6 +138,13 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
 			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
 			if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
+					
+			for extraID = 0, 20 do
+				if IsVehicleExtraTurnedOn(veh, extraID) then 
+					SetVehicleExtra(veh, extraID, 1)
+				end
+			end
+					
 			if data.list.extras then
 				for _, v in pairs(data.list.extras) do SetVehicleExtra(veh, v, 0) end
 			end
