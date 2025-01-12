@@ -1,4 +1,8 @@
-local QBCore = exports[Config.Core]:GetCoreObject()
+if Config.Core == 'qb-core' then
+	local QBCore = exports[Config.Core]:GetCoreObject()
+else
+	-- local ESX = exports.es_extended:getSharedObject()
+end
 
 local Targets, Parking, PlayerJob, Locations = {}, {}, {}, {}
 
@@ -8,43 +12,120 @@ local function makeTargets()
 	for i = 1, #Locations do
 		if Locations[i].garage then
 			if Locations[i].trunkItems then
-				local items = {}
-				for _, item in pairs(Locations[i].trunkItems) do
-					local itemInfo = QBCore.Shared.Items[item.name:lower()]
-					items[item.slot] = {
-						name = itemInfo["name"],
-						amount = tonumber(item.amount),
-						info = item.info,
-						label = itemInfo["label"],
-						description = itemInfo["description"] and itemInfo["description"] or "",
-						weight = itemInfo["weight"],
-						type = itemInfo["type"],
-						unique = itemInfo["unique"],
-						useable = itemInfo["useable"],
-						image = itemInfo["image"],
-						slot = item.slot,
-					}
+				if Config.Core == 'qb-core' then
+					local items = {}
+					for _, item in pairs(Locations[i].trunkItems) do
+						local itemInfo = QBCore.Shared.Items[item.name:lower()]
+						items[item.slot] = {
+							name = itemInfo["name"],
+							amount = tonumber(item.amount),
+							info = item.info,
+							label = itemInfo["label"],
+							description = itemInfo["description"] and itemInfo["description"] or "",
+							weight = itemInfo["weight"],
+							type = itemInfo["type"],
+							unique = itemInfo["unique"],
+							useable = itemInfo["useable"],
+							image = itemInfo["image"],
+							slot = item.slot,
+						}
+					end
+					Locations[i].garage.list[k].trunkItems = items
 				end
-				Locations[i].garage.list[k].trunkItems = items
 			end
 
 			local out = Locations[i].garage.out
 			if Locations[i].garage.ped then Parking[#Parking+1] = makePed(Locations[i].garage.ped.model, out, 1, 1, Locations[i].garage.ped.scenario)
 			else Parking[#Parking+1] = makeProp({prop = "prop_parkingpay", coords = vec4(out.x, out.y, out.z, out.w-180.0)}, true, false) end
-			Targets["JobGarage: "..i] =
-				exports['qb-target']:AddBoxZone("JobGarage: "..i, vec3(out.x, out.y, out.z-1.03), 0.8, 0.5, { name="JobGarage: "..i, heading = out.w+180.0, debugPoly=Config.Debug, minZ=out.z-1.05, maxZ=out.z+0.80 },
-					{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = Loc[Config.Lan].target["label"], job = Locations[i].job, spawncoords = Locations[i].garage.spawn, list = Locations[i].garage.list, prop = Parking[#Parking] }, },
+
+			if GetResourceState("qb-target") == "started" then
+				Targets["JobGarage: "..i] = exports['qb-target']:AddBoxZone("JobGarage: "..i, vec3(out.x, out.y, out.z-1.03), 0.8, 0.5, 
+				{ name="JobGarage: "..i, heading = out.w+180.0, debugPoly=Config.Debug, minZ=out.z-1.05, maxZ=out.z+0.80 },
+				{ options = { { event = "jim-jobgarage:client:Garage:Menu", icon = "fas fa-clipboard", label = Loc[Config.Lan].target["label"], job = Locations[i].job, spawncoords = Locations[i].garage.spawn, list = Locations[i].garage.list, prop = Parking[#Parking] }, },
 					distance = 2.0 })
+
+			elseif GetResourceState('ox_target') == 'started' then
+				Targets["JobGarage: "..i] = exports.ox_target:addBoxZone({
+					coords = vec3(out.x, out.y, out.z-1.03),
+					size = vec3(2, 2, 2),
+					rotation = 45,
+					debug = Config.Debug,
+					drawSprite = true,
+					options = {
+						{
+							name = 'box',
+							event = 'jim-jobgarage:client:Garage:Menu',
+							icon = 'fas fa-clipboard',
+							label = Loc[Config.Lan].target["label"],
+							groups = Locations[i].job,
+							job = Locations[i].job, spawncoords = Locations[i].garage.spawn, list = Locations[i].garage.list, prop = Parking[#Parking]
+						}
+					}
+				})
+			end
+			
 		end
 	end
 end
 
-local function syncLocations() local p = promise.new() QBCore.Functions.TriggerCallback('jim-jobgarage:server:syncLocations', function(cb) p:resolve(cb) end) Locations = Citizen.Await(p) makeTargets() end
+local function syncLocations()
+	local p = promise.new()
+
+	if Config.Core == 'qb-core' then
+		QBCore.Functions.TriggerCallback('jim-jobgarage:server:syncLocations', function(cb)
+			p:resolve(cb)
+		end)
+	else
+		ESX.TriggerServerCallback('jim-jobgarage:server:syncLocations', function(cb)
+			p:resolve(cb)
+		end)
+	end
+	Locations = Citizen.Await(p)
+	makeTargets()
+end
 
 RegisterNetEvent("jim-jobgarage:client:syncLocations", function(newLocations) Locations = newLocations makeTargets() end)
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end)	Wait(10000) syncLocations() end)
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo) PlayerJob = JobInfo end)
-AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end	QBCore.Functions.GetPlayerData(function(PlayerData) PlayerJob = PlayerData.job end) Wait(10000) syncLocations() end)
+
+
+RegisterNetEvent('esx:playerLoaded', function(data)
+	PlayerJob = data.job
+	syncLocations()
+end)
+
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+	QBCore.Functions.GetPlayerData(function(PlayerData)
+		PlayerJob = PlayerData.job
+	end)
+	Wait(10000)
+	syncLocations()
+end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+	PlayerJob = JobInfo
+end)
+
+RegisterNetEvent('esx:setJob', function(job)
+    if source == '' then return end
+    PlayerJob = job
+end)
+
+AddEventHandler('onResourceStart', function(r) 
+	if GetCurrentResourceName() ~= r then 
+		return 
+	end
+	if Config.Core == 'qb-core' then
+		QBCore.Functions.GetPlayerData(function(PlayerData) 
+			PlayerJob = PlayerData.job 
+		end)
+	else
+		if ESX.PlayerLoaded then
+			PlayerJob = ESX.PlayerData.job
+		end
+	end
+	Wait(1000) 
+	syncLocations() 
+end)
 
 local currentVeh = { out = false, current = nil }
 RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
@@ -82,8 +163,13 @@ RegisterNetEvent('jim-jobgarage:client:Garage:Menu', function(data)
 		table.sort(data.list, function(a, b) return a:lower() < b:lower() end)
 		for k, v in pairsByKeys(data.list) do
 			local showButton = false
-			if v.grade then if v.grade <= PlayerJob.grade.level then showButton = true end end
-			if v.rank then for _, b in pairs(v.rank) do if b == PlayerJob.grade.level then showButton = true end end end
+			if Config.Core == 'qb-core' then
+				if v.grade then if v.grade <= PlayerJob.grade.level then showButton = true end end
+				if v.rank then for _, b in pairs(v.rank) do if b == PlayerJob.grade.level then showButton = true end end end
+			else
+				if v.grade then if v.grade <= PlayerJob.grade then showButton = true end end
+				if v.rank then for _, b in pairs(v.rank) do if b == PlayerJob.grade then showButton = true end end end
+			end
 			if not v.grade and not v.rank then showButton = true end
 			if showButton == true then
 				local spawnName = k local spawnHash = GetHashKey(spawnName)
@@ -127,54 +213,108 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 		name = searchCar(GetEntityModel(oldveh))
 		triggerNotify(nil, name.." "..Loc[Config.Lan].error["vehclose"], "error")
 	else
-		QBCore.Functions.SpawnVehicle(data.spawnName, function(veh)
-			local name = data.list.CustomName or searchCar(data.spawnName)
-			currentVeh = { out = true, current = veh, name = name }
-			SetVehicleModKit(veh, 0)
-			NetworkRequestControlOfEntity(veh)
-			SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
-			--SetVehicleNumberPlateText(veh, "PD-"..QBCore.Functions.GetPlayerData().metadata.callsign)
-			SetEntityHeading(veh, data.spawncoords.w)
-			TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
-			if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
-			if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
-			if data.list.extras then
-				for _, v in pairs(data.list.extras) do SetVehicleExtra(veh, v, 0) end
-			end
-			if data.list.livery then
-				if GetNumVehicleMods(veh, 48) == 0 and GetVehicleLiveryCount(veh) ~= 0 then
-					SetVehicleLivery(veh, data.list.livery)
-					SetVehicleMod(veh, 48, -1, false)
-				else
-					SetVehicleMod(veh, 48, (data.list.livery - 1), false)
-					SetVehicleLivery(veh, -1)
+		if Config.Core == 'qb-core' then
+			QBCore.Functions.SpawnVehicle(data.spawnName, function(veh)
+				local name = data.list.CustomName or searchCar(data.spawnName)
+				currentVeh = { out = true, current = veh, name = name }
+				SetVehicleModKit(veh, 0)
+				NetworkRequestControlOfEntity(veh)
+				SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
+				--SetVehicleNumberPlateText(veh, "PD-"..QBCore.Functions.GetPlayerData().metadata.callsign)
+				SetEntityHeading(veh, data.spawncoords.w)
+				TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+				if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
+				if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
+				if data.list.extras then
+					for _, v in pairs(data.list.extras) do SetVehicleExtra(veh, v, 0) end
 				end
-			end
-			if data.list.performance then
-				if type(data.list.performance) ~= "table" then
-					SetVehicleMod(veh, 11, GetNumVehicleMods(veh, 11)-1) -- Engine
-					SetVehicleMod(veh, 12, GetNumVehicleMods(veh, 12)-1) -- Brakes
-					SetVehicleMod(veh, 15, GetNumVehicleMods(veh, 15)-1) -- Suspension
-					SetVehicleMod(veh, 13, GetNumVehicleMods(veh, 13)-1) -- Transmission
-					SetVehicleMod(veh, 16, GetNumVehicleMods(veh, 16)-1) -- Armour
-					ToggleVehicleMod(veh, 18, true) -- Turbo
-				else
-					SetVehicleMod(veh, 11, data.list.performance[1]-1) -- Engine
-					SetVehicleMod(veh, 12, data.list.performance[2]-1) -- Brakes
-					SetVehicleMod(veh, 15, data.list.performance[3]-1) -- Suspension
-					SetVehicleMod(veh, 13, data.list.performance[4]-1) -- Transmission
-					SetVehicleMod(veh, 16, data.list.performance[5]-1) -- Armour
-					ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
+				if data.list.livery then
+					if GetNumVehicleMods(veh, 48) == 0 and GetVehicleLiveryCount(veh) ~= 0 then
+						SetVehicleLivery(veh, data.list.livery)
+						SetVehicleMod(veh, 48, -1, false)
+					else
+						SetVehicleMod(veh, 48, (data.list.livery - 1), false)
+						SetVehicleLivery(veh, -1)
+					end
 				end
-			end
-			if data.list.trunkItems then TriggerServerEvent("jim-jobgarage:server:addTrunkItems", QBCore.Functions.GetPlate(veh), data.list.trunkItems) end
-			TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-			exports[Config.Fuel]:SetFuel(veh, 100.0)
-			SetVehicleEngineOn(veh, true, true)
-			Wait(250)
-			SetVehicleDirtLevel(veh, 0.0)
-			triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
-		end, data.spawncoords, true)
+				if data.list.performance then
+					if type(data.list.performance) ~= "table" then
+						SetVehicleMod(veh, 11, GetNumVehicleMods(veh, 11)-1) -- Engine
+						SetVehicleMod(veh, 12, GetNumVehicleMods(veh, 12)-1) -- Brakes
+						SetVehicleMod(veh, 15, GetNumVehicleMods(veh, 15)-1) -- Suspension
+						SetVehicleMod(veh, 13, GetNumVehicleMods(veh, 13)-1) -- Transmission
+						SetVehicleMod(veh, 16, GetNumVehicleMods(veh, 16)-1) -- Armour
+						ToggleVehicleMod(veh, 18, true) -- Turbo
+					else
+						SetVehicleMod(veh, 11, data.list.performance[1]-1) -- Engine
+						SetVehicleMod(veh, 12, data.list.performance[2]-1) -- Brakes
+						SetVehicleMod(veh, 15, data.list.performance[3]-1) -- Suspension
+						SetVehicleMod(veh, 13, data.list.performance[4]-1) -- Transmission
+						SetVehicleMod(veh, 16, data.list.performance[5]-1) -- Armour
+						ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
+					end
+				end
+				if data.list.trunkItems then TriggerServerEvent("jim-jobgarage:server:addTrunkItems", QBCore.Functions.GetPlate(veh), data.list.trunkItems) end
+				TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+				exports[Config.Fuel]:SetFuel(veh, 100.0)
+				SetVehicleEngineOn(veh, true, true)
+				Wait(250)
+				SetVehicleDirtLevel(veh, 0.0)
+				triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+			end, data.spawncoords, true)
+		else
+			ESX.Game.SpawnVehicle(data.spawnName, vector3(data.spawncoords.x, data.spawncoords.y, data.spawncoords.z), data.spawncoords.h, function(veh)
+				local name = data.list.CustomName or searchCar(data.spawnName)
+				currentVeh = { out = true, current = veh, name = name }
+				SetVehicleModKit(veh, 0)
+				NetworkRequestControlOfEntity(veh)
+				SetVehicleNumberPlateText(veh, string.sub(PlayerJob.label, 1, 5)..tostring(math.random(100, 999)))
+				--SetVehicleNumberPlateText(veh, "PD-"..QBCore.Functions.GetPlayerData().metadata.callsign)
+				SetEntityHeading(veh, data.spawncoords.w)
+				TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+				if data.list.colors then SetVehicleColours(veh, data.list.colors[1], data.list.colors[2]) end
+				if data.list.bulletproof then SetVehicleTyresCanBurst(veh, false) end
+				if data.list.extras then
+					for _, v in pairs(data.list.extras) do SetVehicleExtra(veh, v, 0) end
+				end
+				if data.list.livery then
+					if GetNumVehicleMods(veh, 48) == 0 and GetVehicleLiveryCount(veh) ~= 0 then
+						SetVehicleLivery(veh, data.list.livery)
+						SetVehicleMod(veh, 48, -1, false)
+					else
+						SetVehicleMod(veh, 48, (data.list.livery - 1), false)
+						SetVehicleLivery(veh, -1)
+					end
+				end
+				if data.list.performance then
+					if type(data.list.performance) ~= "table" then
+						SetVehicleMod(veh, 11, GetNumVehicleMods(veh, 11)-1) -- Engine
+						SetVehicleMod(veh, 12, GetNumVehicleMods(veh, 12)-1) -- Brakes
+						SetVehicleMod(veh, 15, GetNumVehicleMods(veh, 15)-1) -- Suspension
+						SetVehicleMod(veh, 13, GetNumVehicleMods(veh, 13)-1) -- Transmission
+						SetVehicleMod(veh, 16, GetNumVehicleMods(veh, 16)-1) -- Armour
+						ToggleVehicleMod(veh, 18, true) -- Turbo
+					else
+						SetVehicleMod(veh, 11, data.list.performance[1]-1) -- Engine
+						SetVehicleMod(veh, 12, data.list.performance[2]-1) -- Brakes
+						SetVehicleMod(veh, 15, data.list.performance[3]-1) -- Suspension
+						SetVehicleMod(veh, 13, data.list.performance[4]-1) -- Transmission
+						SetVehicleMod(veh, 16, data.list.performance[5]-1) -- Armour
+						ToggleVehicleMod(veh, 18, data.list.performance[6]) -- Turbo
+					end
+				end
+				-- exports[Config.Fuel]:SetFuel(veh, 100.0)
+				SetVehicleEngineOn(veh, true, true)
+				Wait(250)
+				SetVehicleDirtLevel(veh, 0.0)
+				triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+				TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+				
+				if data.list.trunkItems then 
+					TriggerServerEvent("jim-jobgarage:server:addTrunkItems", GetVehicleNumberPlateText(currentVeh.current), data.list.trunkItems)
+				end
+			end)
+		end
 	end
 end)
 
@@ -187,7 +327,11 @@ RegisterNetEvent("jim-jobgarage:client:RemSpawn", function(data)
 		for i = 0, 5 do SetVehicleDoorBroken(currentVeh.current, i, false) Wait(150) end
 		Wait(800)
 	end
-	QBCore.Functions.DeleteVehicle(currentVeh.current) currentVeh = { out = false, current = nil }
+	if Config.Core == 'qb-core' then
+		QBCore.Functions.DeleteVehicle(currentVeh.current) currentVeh = { out = false, current = nil }
+	else
+		ESX.Game.DeleteVehicle(currentVeh.current) currentVeh = { out = false, current = nil }
+	end
 end)
 
 local markerOn = false
@@ -223,7 +367,7 @@ end)
 
 AddEventHandler('onResourceStop', function(r) if r ~= GetCurrentResourceName() then return end
 	if GetResourceState("qb-target") == "started" or GetResourceState("ox_target") == "started" then
-		for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end
 		for i = 1, #Parking do unloadModel(GetEntityModel(Parking[i])) DeleteEntity(Parking[i]) end
+		for k in pairs(Targets) do exports['qb-target']:RemoveZone(k) end
 	end
 end)

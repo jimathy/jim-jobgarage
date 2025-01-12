@@ -1,8 +1,12 @@
-local QBCore = exports[Config.Core]:GetCoreObject()
-
 local Locations = Config.Locations
 
-QBCore.Functions.CreateCallback('jim-jobgarage:server:syncLocations', function(source, cb) cb(Locations) end)
+if Config.Core == 'qb-core' then
+	local QBCore = exports[Config.Core]:GetCoreObject()
+	QBCore.Functions.CreateCallback('jim-jobgarage:server:syncLocations', function(source, cb) cb(Locations) end)
+else
+	-- local ESX = exports.es_extended:getSharedObject()
+	ESX.RegisterServerCallback('jim-jobgarage:server:syncLocations', function(source, cb) cb(Locations) end)
+end
 
 RegisterNetEvent('jim-jobgarage:server:syncAddLocations', function(data)
 	local dupe = false
@@ -21,7 +25,15 @@ end)
 
 RegisterNetEvent("jim-jobgarage:server:syncLocations", function() TriggerClientEvent('jim-jobgarage:client:syncLocations', -1, Locations) end)
 
-RegisterNetEvent("jim-jobgarage:server:addTrunkItems", function(plate, items) exports["qb-inventory"]:addTrunkItems(plate, items) end)
+RegisterNetEvent("jim-jobgarage:server:addTrunkItems", function(plate, items) 
+	if Config.Core =='qb-core' then
+		exports["qb-inventory"]:addTrunkItems(plate, items)
+	else
+		for k, v in pairs(items) do
+			exports.ox_inventory:AddItem('trunk'..plate, v.name, v.amount)
+		end
+	end
+end)
 
 local function CheckVersion()
 	PerformHttpRequest('https://raw.githubusercontent.com/jimathy/jim-jobgarage/master/version.txt', function(err, newestVersion, headers)
