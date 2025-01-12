@@ -1,5 +1,5 @@
 # jim-jobgarage
-Job garage for grabbing job related vehicles
+Job garage for grabbing job related vehicles (ESX and QBCore)
 
 ---
 # What is this?
@@ -16,7 +16,7 @@ https://discord.gg/xKgQZ6wZvS
 https://ko-fi.com/jixelpatterns
 
 ---
-# Installation
+# Installation for QBCore
 
 - I always recommend starting my scripts **AFTER** `[qb]` not inside it as it can mess with any dependancies on server load
 - I have a separate folder called `[jimextras]` (that is also in the resources folder) that starts before any scripts would use it.
@@ -35,6 +35,33 @@ ensure [vehicles]
 ensure [jimextras]
 ensure [jim]
 ```
+# Installation for ESX
+
+- Add/Uncomment the following code from fxmanifest.lua
+```
+shared_scripts({ -- remove this if you are not using ESX
+    "@es_extended/imports.lua",
+    "@es_extended/locale.lua",
+})
+```
+- Configure the Config for using ESX and OX
+- I always recommend starting my scripts **AFTER** `[esx_addons]` not inside it as it can mess with any dependancies on server load
+- I have a separate folder called `[jimextras]` (that is also in the resources folder) that starts before any scripts would use it.
+- This ensure's it has everything it requires before trying to load
+- Example of my load order:
+```CSS
+# ESX & Extra stuff
+ensure [core]
+
+# ESX Addons
+# ----------
+ensure [standalone]
+ensure [esx_addons]
+
+ensure [jimextras]
+ensure [jim]
+```
+
 
 ---
 ## Location Setup
@@ -111,6 +138,9 @@ garage = {
 ```
 
 # Changelog
+## v1.4.4:
+	- Added support for ESX, ox_inventory and ox_target
+
 ## v1.4.3:
 	- Fix possible crash when restarting a script that uses jobgarage
 	- Add workaround for people who don't update their garage config in external scripts
