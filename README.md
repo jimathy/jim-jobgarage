@@ -111,6 +111,11 @@ garage = {
 ```
 
 # Changelog
+## v2.0:
+	- Ported to use jim_bridge
+		- now supports qb, qbox, esx and ox_core
+	- Fixes trunk items
+
 ## v1.4.3:
 	- Fix possible crash when restarting a script that uses jobgarage
 	- Add workaround for people who don't update their garage config in external scripts
