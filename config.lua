@@ -1,7 +1,7 @@
 Config = {
 	Lan = "en",
 	System = {
-		Debug = true,  -- Enable to use debug features
+		Debug = false,  -- Enable to use debug features
 		Menu = "qb",
 		Notify = "gta",
 	},
