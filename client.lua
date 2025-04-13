@@ -47,7 +47,7 @@ local function makeTargets()
 					{
 						name = "JobGarage: "..i,
 						heading = out.w,
-						debugPoly = true,
+						debugPoly = debugMode,
 						minZ = out.z-1.05,
 						maxZ = out.z+0.80
 					},
