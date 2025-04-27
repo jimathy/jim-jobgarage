@@ -1,4 +1,8 @@
-local QBCore = exports[Config.Core]:GetCoreObject()
+if Config.Core == 'qb-core' then
+	local QBCore = exports[Config.Core]:GetCoreObject()
+else
+	-- local ESX = exports.es_extended:getSharedObject()
+end
 
 local time = 1000
 function loadModel(model) if not HasModelLoaded(model) then
@@ -107,11 +111,15 @@ function pairsByKeys(t) local a = {} for n in pairs(t) do a[#a+1] = n end table.
 
 function searchCar(vehicle)
 	local newName = nil
-	for k, v in pairs(QBCore.Shared.Vehicles) do
-		if tonumber(v.hash) == GetHashKey(vehicle) then
-		if Config.Debug then print("^5Debug^7: ^2Vehicle info found in^7 ^4vehicles^7.^4lua^7: ^6"..v.hash.. " ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
-		newName = QBCore.Shared.Vehicles[k].name.." "..QBCore.Shared.Vehicles[k].brand
+	if Config.Core == 'qb-core' then
+		for k, v in pairs(QBCore.Shared.Vehicles) do
+			if tonumber(v.hash) == GetHashKey(vehicle) then
+			if Config.Debug then print("^5Debug^7: ^2Vehicle info found in^7 ^4vehicles^7.^4lua^7: ^6"..v.hash.. " ^7(^6"..QBCore.Shared.Vehicles[k].name.."^7)") end
+			newName = QBCore.Shared.Vehicles[k].name.." "..QBCore.Shared.Vehicles[k].brand
+			end
 		end
+	else
+		newName = GetDisplayNameFromVehicleModel(vehicle)
 	end
 	if Config.Debug then
 		if not newName then print("^5Debug^7: ^2Vehicle ^1not ^2found in ^4vehicles^7.^4lua^7: ^6"..vehicle.." ^7(^6"..GetDisplayNameFromVehicleModel(vehicle):lower().."^7)") end

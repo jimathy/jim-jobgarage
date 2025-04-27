@@ -54,8 +54,8 @@ Config = {
 		{ 	zoneEnable = true,
 			job = "police",
 			garage = {
-				spawn = vec4(435.41, -975.93, 25.31, 90.86),
-				out = vec4(441.39, -974.78, 25.7, 178.49),
+				spawn = vec4(421.437378, -1022.769226, 28.942871, 90.706),
+				out = vec4(420.857147, -1029.956055, 29.091, 90.89),
 				list = {
 					["police"] = {
 						CustomName = "Police Car",
@@ -66,6 +66,7 @@ Config = {
 							{ name = "heavyarmor", amount = 2, info = {}, type = "item", slot = 1, },
 							{ name = "empty_evidence_bag", amount = 10, info = {}, type = "item", slot = 2, },
 							{ name = "police_stormram", amount = 1, info = {}, type = "item", slot = 3, },
+							{ name = "water", amount = 2, info = {}, type = "item", slot = 4, },
 						},
 					},
 					["fbi"] = {
