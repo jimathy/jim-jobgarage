@@ -237,16 +237,17 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 				data.list.trunkItems
 			)
 		end
-		TriggerEvent("vehiclekeys:client:SetOwner", GeneratedPlate)
-		if isStarted(Config.General.Fuel) then
+		if Config.General.Fuel ~= nil and Config.General.Fuel ~= "" and isStarted(Config.General.Fuel) then
+			print(Config.General.Fuel)
 			exports[Config.General.Fuel]:SetFuel(veh, 100.0)
 		else
-			SetVehicleFuelLevel(veh, 100.0)
+			SetVehicleFuelLevel(veh, 90.0)
 		end
 		SetVehicleEngineOn(veh, true, true)
 		Wait(250)
 		SetVehicleDirtLevel(veh, 0.0)
 		triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+		TriggerEvent("vehiclekeys:client:SetOwner", GeneratedPlate:upper())
 	end
 end)
 
