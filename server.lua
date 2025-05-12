@@ -1,6 +1,8 @@
-createCallback('jim-jobgarage:server:syncLocations', function(source)
-	return Locations
-end)
+onResourceStart(function()
+	createCallback('jim-jobgarage:server:syncLocations', function(source)
+		return Locations
+	end)
+end, true)
 
 RegisterNetEvent('jim-jobgarage:server:syncAddLocations', function(data)
 	local dupe = false
