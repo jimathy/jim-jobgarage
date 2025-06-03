@@ -1,1 +1,6 @@
-2.0.01
+2.0.02
+
+- Add support for qs-vehiclekeys
+- Fix OXInv trunk items support
+
+https://github.com/jimathy/jim-jobgarage
