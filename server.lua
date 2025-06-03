@@ -41,8 +41,9 @@ RegisterNetEvent("jim-jobgarage:server:addTrunkItems", function(plate, items)
 	local src = source
 	jsonPrint(items)
 	if isStarted(OXInv) then
-		for i = 1, #items do
-			addItem(items[i].name, items[i].amount, items[i].info, "trunk"..plate)
+		exports[OXInv]:ClearInventory("trunk"..plate, nil)
+		for k, v in pairs(items) do
+			exports[OXInv]:AddItem("trunk"..plate, v.name, v.amount or 1, v.info or nil, nil)
 		end
 	end
 	if isStarted(QBInv) then
