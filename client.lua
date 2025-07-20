@@ -15,27 +15,6 @@ local function makeTargets()
 	removeTargets()
 	for i = 1, #Locations do
 		if Locations[i].garage then
-			--if Locations[i].trunkItems then
-			--	local items = {}
-			--	for _, item in pairs(Locations[i].trunkItems) do
-			--		local itemInfo = Items[item.name:lower()]
-			--		items[item.slot] = {
-			--			name = itemInfo["name"],
-			--			amount = tonumber(item.amount),
-			--			info = item.info,
-			--			label = itemInfo["label"],
-			--			description = itemInfo["description"] and itemInfo["description"] or "",
-			--			weight = itemInfo["weight"],
-			--			type = itemInfo["type"],
-			--			unique = itemInfo["unique"],
-			--			useable = itemInfo["useable"],
-			--			image = itemInfo["image"],
-			--			slot = item.slot,
-			--		}
-			--	end
-			--	Locations[i].garage.list[i].trunkItems = items
-			--end
-
 			local out = Locations[i].garage.out
 			if Locations[i].garage.ped then
 				Parking[#Parking+1] = makePed(Locations[i].garage.ped.model, out, 1, 1, Locations[i].garage.ped.scenario)
