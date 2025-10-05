@@ -216,22 +216,32 @@ RegisterNetEvent("jim-jobgarage:client:SpawnList", function(data)
 				data.list.trunkItems
 			)
 		end
-		if Config.General.Fuel ~= nil and Config.General.Fuel ~= "" and isStarted(Config.General.Fuel) then
-			exports[Config.General.Fuel]:SetFuel(veh, 100.0)
-		else
-			SetVehicleFuelLevel(veh, 90.0)
-		end
-		SetVehicleEngineOn(veh, true, true)
-		Wait(250)
-		SetVehicleDirtLevel(veh, 0.0)
-		triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
-		TriggerEvent("vehiclekeys:client:SetOwner", GeneratedPlate:upper())
+        -- FUEL HANDLING (ox_fuel support + fallback)
+        if Config.General.Fuel ~= nil and Config.General.Fuel ~= "" and isStarted(Config.General.Fuel) then
+            if Config.General.Fuel == "ox_fuel" then
+                Entity(veh).state.fuel = 100.0
+            else
+                exports[Config.General.Fuel]:SetFuel(veh, 100.0)
+            end
+        else
+            SetVehicleFuelLevel(veh, 90.0)
+        end
 
-		if isStarted("qs-vehiclekeys") then
-			local model = GetDisplayNameFromVehicleModel(data.spawnName)
-			exports['qs-vehiclekeys']:GiveKeys(GeneratedPlate:upper(), model, true)
-		end
-	end
+        SetVehicleEngineOn(veh, true, true)
+        Wait(250)
+        SetVehicleDirtLevel(veh, 0.0)
+        triggerNotify(nil, Loc[Config.Lan].success["spawned"].." "..name.." ["..GetVehicleNumberPlateText(currentVeh.current).."]", "success")
+
+        -- KEYS HANDLING (qbx_vehiclekeys, qs-vehiclekeys, or default)
+        if isStarted("qbx_vehiclekeys") then
+            exports.qbx_vehiclekeys:GiveKeys(GeneratedPlate:upper())
+        elseif isStarted("qs-vehiclekeys") then
+            local model = GetDisplayNameFromVehicleModel(data.spawnName)
+            exports['qs-vehiclekeys']:GiveKeys(GeneratedPlate:upper(), model, true)
+        else
+            TriggerEvent("vehiclekeys:client:SetOwner", GeneratedPlate:upper())
+        end
+    end
 end)
 
 RegisterNetEvent("jim-jobgarage:client:RemSpawn", function(data)
@@ -309,4 +319,5 @@ end
 onResourceStop(function()
 	removeTargets()
 end, true)
+
 
